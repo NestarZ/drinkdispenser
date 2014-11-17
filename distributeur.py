@@ -6,6 +6,8 @@ __version__ = "1.0"
 __date__ = "2014-15-11"
 # ==============================================================================
 #!/bin/python3
+from copy import copy
+import unittest
 from data import boisson, ingredient
 
 class Distributeur():
@@ -17,11 +19,13 @@ class Distributeur():
         1 : "La monnaie doit être un tuple",
         2 : "Vous devez entrer une valeur pour chaque pièce.",
         3 : "La consommation doit être un tuple",
-        4 : "Vous devez entrer une valeur pour chaque conso (si thé est activé, \
-            le tuple pourra ne pas contenir de valeur pour la dose de chocolat et de café",
-        5 : "Le tuple doit être binaire"
+        4 : "La commande doit être un tuple à valeur pour chaque ingrédient.",
+        5 : "La commande doit être un tuple binaire."
     }
     monnaie_acceptee = ["2Euros", "1Euro", "50Cents", "20Cents", "10Cent", "5Cent"]
+    
+    def __str__(self):
+        return "Distributeur en mode usine"
     
     def __init__(self):
         """Construit le distributeur et intégre ses composantes (ingredients, stock, tarifs, caisse)"""
@@ -120,6 +124,7 @@ class Distributeur():
                 self.ingredients["Chocolat"]: cmd[5] if not is_the else 0}
     
     def get_ingredients(self, cmd):
+        """Récupère (seulement) les ingrédients commandés et les retournent"""
         return {nom:produit for nom, produit in self.ingredients.items() if cmd[produit] > 0}
     
     def verifier_monnaie(self, monnaie):
@@ -155,10 +160,12 @@ class Distributeur():
     def preparer_commande(self, ingredients, cmd, boisson):
         """Utilise les ingrédients nécessaires et demandés pour concevoir la boisson désirée"""
         #Utilise chaque ingrédient demandé pour concocter ma boisson
+        boisson = boisson()
         for ingredient in ingredients.values():
             ingredient.utiliser(cmd[ingredient])
-        _ingredients = [(type(ingredient), i, cmd[ingredient]) for i in range(cmd[ingredient]) for ingredient in ingredients.values()]
-        print(_ingredients)
+            boisson.ajouter_ingredient(ingredient, cmd[ingredient])
+        print("Préparation de la commande")
+        print("="*5,boisson,"="*5,"\n")
             
     def rendre_monnaie(self, monnaie):
         return monnaie
@@ -168,27 +175,29 @@ class Distributeur():
         #Je vérifie d'abord si la monnaie respecte les contraintes
         #du distributeur, si oui alors monnaie_accepte sera Vrai
         #sinon il sera Faux
-        _order = self.formater_commande(commande)
-        ingredients = self.get_ingredients(_order)
-        monnaie_accepte = self.verifier_monnaie(monnaie)
-        if monnaie_accepte:
-            #Si la monnaie est bonne, alors je régarde si je peux
-            #trouver une boisson qui correspond à la commande
-            #si oui, alors je récupère cette boisson
-            boisson = self.correspondance_boisson(ingredients)
-            if boisson:
-                #Si j'ai récupéré une boisson, alors je calcul
-                #le prix de ma commande
-                prix = self.get_prix_boisson(_order)
-                print("Prix du {} : {} Cents".format(boisson, prix))
-                #et je regarde si le distributeur peut me rendre
-                #la monnaie (si besoin est)
-                rendu_monnaie_possible = self.verifier_rendu_monnaie_possible(monnaie, prix)
-                if rendu_monnaie_possible:
-                    #si je peux rendre la monnaie (si besoin)
-                    #alors je prépare la commande et je la propose
-                    #au client
-                    return self.preparer_commande(ingredients, _order, boisson)
+        commande_acceptee = self.verifier_commande(commande)
+        if commande_acceptee:
+            _order = self.formater_commande(commande)
+            ingredients = self.get_ingredients(_order)
+            monnaie_acceptee = self.verifier_monnaie(monnaie)
+            if monnaie_acceptee:
+                #Si la monnaie est bonne, alors je régarde si je peux
+                #trouver une boisson qui correspond à la commande
+                #si oui, alors je récupère cette boisson
+                boisson = self.correspondance_boisson(ingredients)
+                if boisson:
+                    #Si j'ai récupéré une boisson, alors je calcul
+                    #le prix de ma commande
+                    prix = self.get_prix_boisson(_order)
+                    print("Prix({})={}C".format('+'.join(ingredients.keys()), prix))
+                    #et je regarde si le distributeur peut me rendre
+                    #la monnaie (si besoin est)
+                    rendu_monnaie_possible = self.verifier_rendu_monnaie_possible(monnaie, prix)
+                    if rendu_monnaie_possible:
+                        #si je peux rendre la monnaie (si besoin)
+                        #alors je prépare la commande et je la propose
+                        #au client
+                        return self.preparer_commande(ingredients, _order, boisson)
         #Si une de toutes ces vérifications n'est pas valide
         #alors je rend la monnaie
         print("Impossible. Rend la monnaie.")
@@ -197,19 +206,28 @@ class Distributeur():
 def maintenance(distributeur):
     assert isinstance(distributeur, Distributeur), "Erreur : Le parametre n'est pas un distributeur."
     if not type(distributeur) is type(DistributeurMaintenance):
-        return DistributeurMaintenance()
+        return DistributeurMaintenance(distributeur)
     return distributeur
 
 def mise_en_service(distributeur):
     assert isinstance(distributeur, Distributeur), "Erreur : Le parametre n'est pas un distributeur."
-    assert not isinstance(distributeur, DistributeurMaintenance), "Distributeur en maintenance ne peut être mis en service."
     if not type(distributeur) is type(DistributeurFonctionnement):
-        return DistributeurFonctionnement()
+        return DistributeurFonctionnement(distributeur)
     return distributeur
 
 # MACHINE
 class DistributeurFonctionnement(Distributeur):
     exception = lambda fct : Exception('Action {} indisponnible en mode Fonctionnement'.format(fct))
+    state = "Distributeur en mode fonctionnement"
+    def __new__(cls, other):
+        if isinstance(other, Distributeur):
+            other.__class__ = DistributeurFonctionnement
+            return other
+        return object.__new__(cls)
+    def __init__(self, other=None):
+        pass
+    def __str__(self):
+        return DistributeurFonctionnement.state
     def changer_prix_unitaire(self, item, prix):
         raise DistributeurFonctionnement.exception('changer_prix_unitaire')
     def prix_unitaire(self, item):
@@ -228,44 +246,64 @@ class DistributeurFonctionnement(Distributeur):
         raise DistributeurFonctionnement.exception('remplir_stock')
     def remplir_tout_stock(self):
         raise DistributeurFonctionnement.exception('remplir_tout_stock')
-    def ajout_stock(self, niveau):
+    def ajouter_stock(self, niveau):
         raise DistributeurFonctionnement.exception('ajout_stock')
     def hitorique(self):
         raise DistributeurFonctionnement.exception('hitorique')
-    def edition_caisse(self):
-        raise DistributeurFonctionnement.exception('edition_caisse')
 
 class DistributeurMaintenance(Distributeur):
     exception = lambda fct : Exception('Action {} indisponnible en mode Maintenance'.format(fct))
-    def verif_pieces(self):
-        raise DistributeurMaintenance.exception('verif_pieces')
-    def correspondance_boisson(self):
-        raise DistributeurMaintenance.exception('correspondance_boisson')
-    def is_enough_stock(self):
-        raise DistributeurMaintenance.exception('is_enough_stock')
-    def preparation_commande(self):
-        raise DistributeurMaintenance.exception('preparation_commande')
-    def commande(self, tuple1, tuple2):
-        raise DistributeurMaintenance.exception('commande')
-
+    state = "Distributeur en mode maintenance"
+    def __new__(cls, other):
+        if isinstance(other, Distributeur):
+            other.__class__ = DistributeurMaintenance
+            return other
+        return object.__new__(cls)
+    def __init__(self, other=None):
+        pass
+    def __str__(self):
+        return DistributeurMaintenance.state
+    def verifier_commande(self, cmd):
+        raise DistributeurFonctionnement.exception('verifier_commande')
+    def formater_commande(self, cmd):
+         raise DistributeurFonctionnement.exception('formater_commande')   
+    def get_ingredients(self, cmd):
+        raise DistributeurFonctionnement.exception('get_ingredients')    
+    def verifier_monnaie(self, monnaie):
+        raise DistributeurFonctionnement.exception('verifier_monnaie')
+    def verifier_rendu_monnaie_possible(self, monnaie, prix):
+        raise DistributeurFonctionnement.exception('verifier_rendu_monnaie_possible')    
+    def correspondance_boisson(self, ingredients):
+        raise DistributeurFonctionnement.exception('correspondance_boisson')
+    def get_prix_boisson(self, cmd):
+        raise DistributeurFonctionnement.exception('get_prix_boisson')    
+    def verifier_stock_suffisant(self):
+        raise DistributeurFonctionnement.exception('verifier_stock_suffisant')    
+    def preparer_commande(self, ingredients, cmd, boisson):
+        raise DistributeurFonctionnement.exception('preparer_commande')            
+    def rendre_monnaie(self, monnaie):
+        raise DistributeurFonctionnement.exception('rendre_monnaie')    
+    def commander(self, monnaie, commande):
+        raise DistributeurFonctionnement.exception('commander')    
+            
 if __name__ == "__main__":
     print(">>> machine = Distributeur()","#Creation de la machine")
     machine = Distributeur()
     print(">>> machine.remplir_tout_stock()","#Remplissage des stocks")
     machine.remplir_tout_stock()
-    print(">>> machine.commande((1,1,1,1,1,1), (1,1,1,1,1,1))", "#Thé + lait + 3sucres (3.85E)")
+    print(">>> machine.commande((1,1,1,1,1,1), (1,1,1,1,1,1))")
     machine.commander((1,1,1,1,1,1), (1,1,1,1,1,1))
-    print(">>> machine.commande((0,2,1,0,1,0), (0,1,1,0,1,1))", "#Macciato + 1sucre (2.1E)")
+    print(">>> machine.commande((0,2,1,0,1,0), (0,1,1,0,1,1))")
     machine.commander((0,2,1,0,1,0), (0,1,1,0,1,1))
-    print(">>> machine.commande((1,0,0,0,0,0), (1,0,1,1,0,0))", "#Thé + lait + 2sucres (2.0E)")
+    print(">>> machine.commande((1,0,0,0,0,0), (1,0,1,1,0,0))")
     machine.commander((1,0,0,0,0,0), (1,0,1,1,0,0))
-    print(">>> print(machine)", "#Type de la variable machine")
+    print(">>> print(machine)")
     print(machine)
-    print(">>> machine_en_maintenance = maintenance(machine)", "#Mise en maintenance de la machine")
-    machine_en_maintenance = maintenance(machine)
-    print(">>> print(machine_en_maintenance)", "#Type de la variable machine_en_maintenance")
-    print(machine_en_maintenance)
-    print(">>> machine_en_service = mise_en_service(machine)", "#Mise en service de la machine")
-    machine_en_service = mise_en_service(machine)
-    print(">>> print(machine_en_service)", "#Type de la variable machine_en_service")
-    print(machine_en_service)
+    print(">>> machine = maintenance(machine)")
+    machine = maintenance(machine)
+    print(">>> print(machine)")
+    print(machine)
+    print(">>> machine = mise_en_service(machine)")
+    machine = mise_en_service(machine)
+    print(">>> print(machine)")
+    print(machine)

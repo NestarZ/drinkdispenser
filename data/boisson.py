@@ -5,9 +5,13 @@ try:
 except ImportError:
     #permet de lancer ce fichier en stand-alone
     import ingredient
-
+    
+class MetaBoisson(type):
+    def __str__(cls):
+        return cls.__name__
+    
 # BOISSONS 
-class Boisson():
+class Boisson(metaclass=MetaBoisson):
     """Classe mère de toutes les boissons"""
     #Je met les ingredients nécessaires et optionnels
     #de la boisson dans deux tuples (ps:voir les enfants)
@@ -22,18 +26,22 @@ class Boisson():
         #print(Boisson) => Boisson
         #print(Cafe) => Cafe
         #a = The; print(a) => The
-        with_lait = ingredient.Lait in self.ingredients
-        with_sucre = ingredient.Sucre in self.ingredients
+        with_lait = ingredient.Lait in self.ingredients and not ingredient.Lait in type(self).ingredients_de_base
+        with_sucre = ingredient.Sucre in self.ingredients and not ingredient.Sucre in type(self).ingredients_de_base
         dose_sucre = self.ingredients.count(ingredient.Sucre)
-        print(self.ingredients)
-        return "{}{}{}".format(
+        return "Et voici un {}{}{}{}!!".format(
             type(self).__name__,
-            "+ Lait" if with_lait else '',
-            "+ {} Sucre".format(dose_sucre) if with_sucre else '')
+            " avec du lait" if with_lait else '',
+            " et" if with_lait and with_sucre else '',
+            " avec {} morceaux de sucre".format(
+                dose_sucre) if with_sucre else '')
     
-    def __init__(self, ingredients):
-        self.ingredients = ingredients
+    def __init__(self):
+        self.ingredients = list()
         
+    def ajouter_ingredient(self, ingredient, quantite):
+        for q in range(quantite):
+            self.ingredients.append(type(ingredient))
     
     @classmethod
     def is_ingredients(cls, ingredients):

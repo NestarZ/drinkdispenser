@@ -66,7 +66,7 @@ class Ingredient():
         #au stock maximum mais doit être positif et naturel.
         #Encore uen fois, si ce n'est pas le cas,
         #je lève une erreur avec le texte adéquat.
-        print("Fixe le stock de {} à {}".format(self, value))
+        print("Stock({})={}".format(self, value))
         self.__stock = value
 
     @max_stock.setter
