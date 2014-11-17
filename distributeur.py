@@ -217,13 +217,13 @@ def mise_en_service(distributeur):
 
 # MACHINE
 class DistributeurFonctionnement(Distributeur):
-    exception = lambda fct : Exception('Action {} indisponnible en mode Fonctionnement'.format(fct))
+    exception = lambda fct : Exception('Action {} indisponnible en mode fonctionnement'.format(fct))
     state = "Distributeur en mode fonctionnement"
     def __new__(cls, other):
-        if isinstance(other, Distributeur):
-            other.__class__ = DistributeurFonctionnement
-            return other
-        return object.__new__(cls)
+        """Change la classe d'un objet distributeur en classe DistributeurFonctionnement"""
+        assert isinstance(other, Distributeur), "Seul un distributeur peut être basculé en mode fonctionnement."
+        other.__class__ = DistributeurFonctionnement
+        return other
     def __init__(self, other=None):
         pass
     def __str__(self):
@@ -252,13 +252,13 @@ class DistributeurFonctionnement(Distributeur):
         raise DistributeurFonctionnement.exception('hitorique')
 
 class DistributeurMaintenance(Distributeur):
-    exception = lambda fct : Exception('Action {} indisponnible en mode Maintenance'.format(fct))
+    exception = lambda fct : Exception('Action {} indisponnible en mode maintenance'.format(fct))
     state = "Distributeur en mode maintenance"
     def __new__(cls, other):
-        if isinstance(other, Distributeur):
-            other.__class__ = DistributeurMaintenance
-            return other
-        return object.__new__(cls)
+        """Change la classe d'un objet Distributeur en classe DistributeurMaintenance"""
+        assert isinstance(other, Distributeur), "Seul un distributeur peut être basculé en mode maintenance."
+        other.__class__ = DistributeurMaintenance
+        return other
     def __init__(self, other=None):
         pass
     def __str__(self):
