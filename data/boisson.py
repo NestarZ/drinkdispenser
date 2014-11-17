@@ -6,9 +6,15 @@ except ImportError:
     #permet de lancer ce fichier en stand-alone
     import ingredient
 
-# BOISSONS
-class MetaBoisson(type):
-    def __str__(cls):
+# BOISSONS 
+class Boisson():
+    """Classe mère de toutes les boissons"""
+    #Je met les ingredients nécessaires et optionnels
+    #de la boisson dans deux tuples (ps:voir les enfants)
+    ingredients_de_base = tuple()
+    ingredients_optionnels = tuple()
+    
+    def __str__(self):
         """Permet d'afficher le type de la boisson"""
         #Lorsque j'affiche ou je demande de convertir
         #ma boisson en chaine de caractère, l'element
@@ -16,28 +22,33 @@ class MetaBoisson(type):
         #print(Boisson) => Boisson
         #print(Cafe) => Cafe
         #a = The; print(a) => The
-        return cls.__name__
+        with_lait = ingredient.Lait in self.ingredients
+        with_sucre = ingredient.Sucre in self.ingredients
+        dose_sucre = self.ingredients.count(ingredient.Sucre)
+        print(self.ingredients)
+        return "{}{}{}".format(
+            type(self).__name__,
+            "+ Lait" if with_lait else '',
+            "+ {} Sucre".format(dose_sucre) if with_sucre else '')
     
-class Boisson(metaclass=MetaBoisson):
-    """Classe mère de toutes les boissons"""
-    #Je met les ingredients nécessaires et optionnels
-    #de la boisson dans deux tuples (ps:voir les enfants)
-    ingredients_de_base = tuple()
-    ingredients_optionnels = tuple()
+    def __init__(self, ingredients):
+        self.ingredients = ingredients
+        
     
     @classmethod
     def is_ingredients(cls, ingredients):
         """Vérifie si les ingrédients correspond à la boisson"""
         #Est-ce que les ingrédients en parametre sont dans les
         #ingredients de base ou optionnels de la boisson ?
-        for ingredient in ingredients:
+        _ingredients = [type(i) for i in ingredients]
+        for ingredient in _ingredients:
             if not (ingredient in cls.ingredients_de_base or
             ingredient in cls.ingredients_optionnels):
                 return False
         #Est-ce que les ingredients de base de la boisson
         #sont dans les ingredients en parametre ?
         for ingredient in cls.ingredients_de_base:
-            if not ingredient in ingredients:
+            if not ingredient in _ingredients:
                 return False
         #Si oui je retourne la boisson
         return cls
