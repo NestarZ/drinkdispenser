@@ -26,9 +26,9 @@ class Boisson(metaclass=MetaBoisson):
         #print(Boisson) => Boisson
         #print(Cafe) => Cafe
         #a = The; print(a) => The
-        with_lait = ingredient.Lait in self.ingredients and not ingredient.Lait in type(self).ingredients_de_base
-        with_sucre = ingredient.Sucre in self.ingredients and not ingredient.Sucre in type(self).ingredients_de_base
-        dose_sucre = self.ingredients.count(ingredient.Sucre)
+        with_lait = ingredient.Lait in self.goblet and not ingredient.Lait in type(self).ingredients_de_base
+        with_sucre = ingredient.Sucre in self.goblet and not ingredient.Sucre in type(self).ingredients_de_base
+        dose_sucre = self.goblet.count(ingredient.Sucre)
         return "Et voici un {}{}{}{}!!".format(
             type(self).__name__,
             " avec du lait" if with_lait else '',
@@ -37,11 +37,11 @@ class Boisson(metaclass=MetaBoisson):
                 dose_sucre) if with_sucre else '')
     
     def __init__(self):
-        self.ingredients = list()
+        self.goblet = list()
         
     def ajouter_ingredient(self, ingredient, quantite):
         for q in range(quantite):
-            self.ingredients.append(type(ingredient))
+            self.goblet.append(type(ingredient))
     
     @classmethod
     def is_ingredients(cls, ingredients):
