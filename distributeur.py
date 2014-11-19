@@ -14,6 +14,7 @@ class Distributeur():
     """Distributeur de boissons chaudes, nécessite des pièces de monnaie européennes"""
     
     #Tout les distributeurs partagent la même liste de pièce accepté
+    #ansi que le même dictionnaire d'erreur
     erreur = \
     {
         1 : "La monnaie doit être un tuple",
@@ -25,6 +26,7 @@ class Distributeur():
     monnaie_acceptee = ["2Euros", "1Euro", "50Cents", "20Cents", "10Cent", "5Cent"]
     
     def __str__(self):
+        #print(Distributeur()) => Distributeur en mode usine
         return "Distributeur en mode usine"
     
     def __init__(self):
@@ -205,13 +207,13 @@ class Distributeur():
     
 def maintenance(distributeur):
     assert isinstance(distributeur, Distributeur), "Erreur : Le parametre n'est pas un distributeur."
-    if not type(distributeur) is type(DistributeurMaintenance):
+    if not isinstance(distributeur, DistributeurMaintenance):
         return DistributeurMaintenance(distributeur)
     return distributeur
 
 def mise_en_service(distributeur):
     assert isinstance(distributeur, Distributeur), "Erreur : Le parametre n'est pas un distributeur."
-    if not type(distributeur) is type(DistributeurFonctionnement):
+    if not isinstance(distributeur, DistributeurFonctionnement):
         return DistributeurFonctionnement(distributeur)
     return distributeur
 
