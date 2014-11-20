@@ -115,7 +115,7 @@ class Distributeur:
         return self.__historique
     
     @property
-    def boisson(self):
+    def boissons(self):
         return self.__boissons
 
     @property
@@ -275,7 +275,7 @@ class Distributeur:
 
 
     def verifier_rendu_monnaie_possible(self, monnaie, prix):
-        return True
+        return monnaie
 
 
     def correspondance_boisson(self, type_des_ingredients):
@@ -374,7 +374,7 @@ class Distributeur:
                             # au client
 
                         return self.preparer_commande(boites_a_utiliser,
-                                _order, boisson)
+                                _order, boisson), rendu_monnaie_possible
 
             # Si une de toutes ces verifications n'est pas valide
             # alors je rend la monnaie

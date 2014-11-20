@@ -38,7 +38,39 @@ class TestDistributeur(unittest.TestCase):
         caisse = machine.caisse
         self.assertEqual(tuple(0 for v in caisse), caisse)
         self.assertEqual(len(caisse), len(machine.monnaie_acceptee))
-        
+
+    def test_changer_prix(self):
+        machine = Distributeur()
+        prix = {0:0, 1:100}
+        for produit in machine.ingredients:
+            machine.changer_prix_unitaire(produit, prix)
+            self.assertEqual(prix, machine.prix_unitaire(produit))
+            
+        prix = 50
+        for produit in machine.ingredients:
+            machine.changer_prix_unitaire(produit, prix)
+            prix_unitaire = machine.prix_unitaire(produit)
+            self.assertEqual(prix, prix_unitaire[1])
+            self.assertEqual({0:0, 1:prix}, prix_unitaire)
+
+    def test_commander(self):
+        machine = Distributeur()
+        machine.remplir_tout_stock()
+        boisson, monnaie = machine.commander((1,1,1,1,1,1), (1,1,1,1,1,1))
+
+    def test_mise_en_service(self):
+        machine = Distributeur()
+        self.assertNotIsInstance(machine, DistributeurFonctionnement)
+        mise_en_service(machine)
+        self.assertIsInstance(machine, Distributeur)
+        self.assertIsInstance(machine, DistributeurFonctionnement)
+
+    def test_mise_en_maintenance(self):
+        machine = Distributeur()
+        self.assertNotIsInstance(machine, DistributeurMaintenance)
+        maintenance(machine)
+        self.assertIsInstance(machine, Distributeur)
+        self.assertIsInstance(machine, DistributeurMaintenance)
         
 def maintenance(distributeur):
     assert isinstance(distributeur, Distributeur), \
