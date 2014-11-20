@@ -4,7 +4,6 @@ try:
     from .ingredient import Cafe, Sucre, Lait, Chocolat, The
     from .boite import Boite
     from . import boisson
-    print("Fichier distrib_usine importé")
 except (ImportError, SystemError) as e:
     print("Lancement du fichier distrib_usine en stand-alone")
     from ingredient import Cafe, Sucre, Lait, Chocolat, The
@@ -47,7 +46,7 @@ class Distributeur:
     def __init__(self):
         """Construit le distributeur et integre ses composantes
         (boites, stock, tarifs, caisse)"""
-
+        print("Creation d'un distributeur")
         # self.ingredients contient des definitions de chaque ingredient que le
         # distributeur est censé geré.
 

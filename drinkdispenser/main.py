@@ -10,6 +10,8 @@ from data.distrib_mode import DistributeurMaintenance
 from data.distrib_mode import DistributeurFonctionnement
 import unittest
 
+DEBUG = True
+
 class TestDistributeur(unittest.TestCase):
     def test_unicite(self):
         machine1 = Distributeur()
@@ -87,28 +89,9 @@ def mise_en_service(distributeur):
         return DistributeurFonctionnement(distributeur)
     return distributeur
 
-def main():
-##    print(">>> machine = Distributeur()","#Creation de la machine")
-##    machine = Distributeur()
-##    print(">>> machine.remplir_tout_stock()","#Remplissage des stocks")
-##    machine.remplir_tout_stock()
-##    print(">>> machine.commande((1,1,1,1,1,1), (1,1,1,1,1,1))")
-##    machine.commander((1,1,1,1,1,1), (1,1,1,1,1,1))
-##    print(">>> machine.commande((0,2,1,0,1,0), (0,1,1,0,1,1))")
-##    machine.commander((0,2,1,0,1,0), (0,1,1,0,1,1))
-##    print(">>> machine.commande((1,0,0,0,0,0), (1,0,1,1,0,0))")
-##    machine.commander((1,0,0,0,0,0), (1,0,1,1,0,0))
-##    print(">>> print(machine)")
-##    print(machine)
-##    print(">>> machine = maintenance(machine)")
-##    machine = maintenance(machine)
-##    print(">>> print(machine)")
-##    print(machine)
-##    print(">>> machine = mise_en_service(machine)")
-##    machine = mise_en_service(machine)
-##    print(">>> print(machine)")
-##    print(machine)
-    pass
 if __name__ == "__main__":
-    main()
-    unittest.main()
+    #unittest.main()
+    machine = Distributeur()
+    print(machine)
+    maintenance(machine)
+    print(machine)
