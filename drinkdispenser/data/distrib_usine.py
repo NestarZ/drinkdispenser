@@ -11,7 +11,6 @@ except (ImportError, SystemError) as e:
     from boite import Boite
     from stats import Stats
     import boisson
-    import stats
 
 # MACHINE MODE USINE
 
