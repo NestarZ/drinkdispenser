@@ -77,7 +77,6 @@ class TestDistributeur(unittest.TestCase):
         boisson = machine.correspondance_boisson(commande_the)
         self.assertIsInstance(boisson, The)
 
-
     def test_commander(self):
         machine = Distributeur()
         machine.remplir_tout_stock()
