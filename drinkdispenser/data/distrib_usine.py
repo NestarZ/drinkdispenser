@@ -7,11 +7,11 @@ try:
     from . import boisson
 except (ImportError, SystemError) as e:
     print("Lancement du fichier distrib_usine en stand-alone")
-    from .ingredient import Cafe, Sucre, Lait, Chocolat, The
-    from .boite import Boite
-    from .stats import Stats
-    from . import boisson
-    from . import stats
+    from ingredient import Cafe, Sucre, Lait, Chocolat, The
+    from boite import Boite
+    from stats import Stats
+    import boisson
+    import stats
 
 # MACHINE MODE USINE
 
