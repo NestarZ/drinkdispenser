@@ -24,17 +24,17 @@ class TestDistributeur(unittest.TestCase):
         machine = Distributeur()
         machine.remplir_tout_stock()
         for produit in machine.ingredients:
-            stock = machine.get_stock_size(produit)
-            stock_max = machine.get_stock_max(produit)
-            self.assertEqual(stock, stock_max)
+            stock_size = machine.get_stock_size(produit)
+            stock_max_size = machine.get_stock_max(produit)
+            self.assertEqual(stock_size, stock_max_size)
 
     def test_remplir_stock(self):
         machine = Distributeur()
         for produit in machine.ingredients:
             machine.remplir_stock(produit)
-            stock = machine.get_stock_size(produit)
-            stock_max = machine.get_stock_max(produit)
-            self.assertEqual(stock, stock_max)
+            stock_size = machine.get_stock_size(produit)
+            stock_max_size = machine.get_stock_max(produit)
+            self.assertEqual(stock_size, stock_max_size)
 
     def test_vider_caisse(self):
         machine = Distributeur()
@@ -56,7 +56,8 @@ class TestDistributeur(unittest.TestCase):
             prix_unitaire = machine.prix_unitaire(produit)
             self.assertEqual({0: 0, 1: prix}, prix_unitaire)
 
-        prix = {2:10, 3:20}
+        # Prix pour des doses inférieurs à 3 (!=0) non déf.
+        prix = {3: 10, 4: 20}
         for produit in machine.ingredients:
             with self.assertRaises(AssertionError) as cm:
                 machine.changer_prix_unitaire(produit, prix)
@@ -70,19 +71,20 @@ class TestDistributeur(unittest.TestCase):
                 prix_unitaire = machine.prix_unitaire(produit)
             the_exception = cm.exception
 
-
-    def test_correspondance_boisson(self):
-        machine = Distributeur()
-        commande_the = (0,0,0,1,0,0)
-        boisson = machine.correspondance_boisson(commande_the)
-        self.assertIsInstance(boisson, The)
-
     def test_commander(self):
         machine = Distributeur()
         machine.remplir_tout_stock()
-        with self.assertRaises(Exception) as cm:
+        with self.assertRaises(AssertionError) as cm:
             boisson, monnaie = machine.commander(
                 (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
+        machine.changer_prix_unitaire("Thé", 10)
+        machine.changer_prix_unitaire("Lait", 5)
+        machine.changer_prix_unitaire("Sucre", {1: 5, 2: 5, 3: 15})
+        print(machine.tarifs)
+        boisson, monnaie = machine.commander(
+            (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
+        from data.boisson import The
+        self.assertIsInstance(boisson, The)
 
     def test_mise_en_service(self):
         machine = Distributeur()
@@ -98,10 +100,33 @@ class TestDistributeur(unittest.TestCase):
         self.assertIsInstance(machine, Distributeur)
         self.assertIsInstance(machine, DistributeurMaintenance)
 
+    def test_statistiques(self):
+        machine = Distributeur()
+        machine.reset()
+        machine.remplir_tout_stock()
+        machine.changer_prix_unitaire("Café", 10)
+        machine.changer_prix_unitaire("Chocolat", 5)
+        machine.changer_prix_unitaire("Thé", 10)
+        machine.changer_prix_unitaire("Lait", 5)
+        machine.changer_prix_unitaire("Sucre", {1: 5, 2: 5, 3: 15})
+        boisson, monnaie = machine.commander(
+            (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
+        machine.statistiques()
+        boisson, monnaie = machine.commander(
+            (1, 1, 1, 1, 1, 1), (1, 0, 0, 0, 1, 1))
+        machine.statistiques()
+        boisson, monnaie = machine.commander(
+            (1, 1, 1, 1, 1, 1), (0, 0, 1, 0, 1, 0))
+        machine.statistiques()
+        boisson, monnaie = machine.commander(
+            (1, 1, 1, 1, 1, 1), (0, 0, 1, 0, 1, 1))
+        machine.statistiques()
+
 
 def maintenance(distributeur):
     assert isinstance(distributeur, Distributeur), \
-        "Erreur : Le parametre n'est pas un distributeur."
+        "Le parametre n'est pas un distributeur."
+    assert not distributeur.commande_en_cours, "La machine traite une commande"
     if not isinstance(distributeur, DistributeurMaintenance):
         return DistributeurMaintenance(distributeur)
     return distributeur

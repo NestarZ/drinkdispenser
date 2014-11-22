@@ -1,5 +1,11 @@
 #!/bin/python3
-class Ingredient:
+class MetaIngredient(type):
+
+    def __str__(cls):
+        return cls.nom.capitalize()
+
+
+class Ingredient(metaclass=MetaIngredient):
 
     def __repr__(self):
         return type(self).nom

@@ -4,7 +4,7 @@ try:
     from data import ingredient
 except ImportError:
     # permet de lancer ce fichier en stand-alone
-    import ingredient
+    from . import ingredient
 
 
 class MetaBoisson(type):

@@ -40,6 +40,8 @@ class Boite():
         return self.type_dingredient_acceptee.nom
 
     def get_prix_unitaire(self, value):
+        if value == 0:
+            return self.prix_unitaire[0]
         assert self.prix_unitaire.get(1, False), Boite.error[-1]
         return self.prix_unitaire.get(value, self.prix_unitaire[1] * value)
 

@@ -4,7 +4,7 @@ try:
     from .distrib_usine import Distributeur
 except (ImportError, SystemError) as e:
     print("Lancement du fichier distrib_mode en stand-alone")
-    from distrib_usine import Distributeur
+    from .distrib_usine import Distributeur
 
 # MODES DE LA MACHINE
 
@@ -31,8 +31,7 @@ class DistributeurFonctionnement(Distributeur):
         return type(self).state
 
     def changer_prix_unitaire(self, item, prix):
-        raise type(self).exception('changer_prix_unitaire'
-                                                   )
+        raise type(self).exception('changer_prix_unitaire')
 
     def prix_unitaire(self, item):
         raise type(self).exception('prix_unitaire')
