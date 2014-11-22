@@ -51,7 +51,7 @@ class Boite():
 
     @property
     def prix_unitaire(self):
-        """Retourne le prix unitaire de chaque element de la boite"""
+        """Retourne le prix unitaire de chaque ingrédient de la boite"""
         return self.__prix_unitaire
 
     @property
@@ -71,8 +71,8 @@ class Boite():
 
     @prix_unitaire.setter
     def prix_unitaire(self, value):
-        """Fixe le prix unitaire de chaque element de la boite
-        (sous condition d'être valide)"""
+        """Fixe le prix unitaire de chaque ingrédient de la boite
+        (sous condition d'être valide) (dict de prix possible)"""
         if isinstance(value, dict):
             assert value, Boite.error[0]
             assert not False in (
@@ -96,7 +96,7 @@ class Boite():
             self.__prix_unitaire.update({0: 0})
 
     def recharger_boite(self, type_dingredient, value):
-        """Fixe le contenu de la boite"""
+        """Recharge le contenu de la boite jusqu'à une certaine quantité"""
         assert type_dingredient is self.__type_dingredient_acceptee, Boite.error[
             6]
         assert ((isinstance(value, int) or isinstance(value, float))
@@ -113,7 +113,7 @@ class Boite():
 
     @taille_max.setter
     def taille_max(self, value):
-        """Fixe le Boite max de l'Boite sous condition d'être un Boite max valide"""
+        """Fixe la taille max de la boite sous condition d'être une taille max valide"""
         assert isinstance(value, int) and int(
             abs(value)) == value, Boite.error[9]
         # Idem que set_Boite mais pour le Boite maximum avec d'autres
