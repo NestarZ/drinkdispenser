@@ -1,10 +1,10 @@
-# ==============================================================================
+# ====================================================================
 """Distributeur de boissons chaudes"""
-# ==============================================================================
+# ====================================================================
 __author__ = "Medeville Marion and Rhouzlane Elias"
 __version__ = "1.0"
 __date__ = "2014-15-11"
-# ==============================================================================
+# ====================================================================
 from data.distrib_usine import Distributeur
 from data.distrib_mode import DistributeurMaintenance
 from data.distrib_mode import DistributeurFonctionnement
@@ -54,14 +54,36 @@ class TestDistributeur(unittest.TestCase):
         for produit in machine.ingredients:
             machine.changer_prix_unitaire(produit, prix)
             prix_unitaire = machine.prix_unitaire(produit)
-            self.assertEqual(prix, prix_unitaire[1])
             self.assertEqual({0: 0, 1: prix}, prix_unitaire)
+
+        prix = {2:10, 3:20}
+        for produit in machine.ingredients:
+            with self.assertRaises(AssertionError) as cm:
+                machine.changer_prix_unitaire(produit, prix)
+                prix_unitaire = machine.prix_unitaire(produit)
+            the_exception = cm.exception
+
+        prix = "10"
+        for produit in machine.ingredients:
+            with self.assertRaises(Exception) as cm:
+                machine.changer_prix_unitaire(produit, prix)
+                prix_unitaire = machine.prix_unitaire(produit)
+            the_exception = cm.exception
+
+
+    def test_correspondance_boisson(self):
+        machine = Distributeur()
+        commande_the = (0,0,0,1,0,0)
+        boisson = machine.correspondance_boisson(commande_the)
+        self.assertIsInstance(boisson, The)
+
 
     def test_commander(self):
         machine = Distributeur()
         machine.remplir_tout_stock()
-        boisson, monnaie = machine.commander(
-            (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
+        with self.assertRaises(Exception) as cm:
+            boisson, monnaie = machine.commander(
+                (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
 
     def test_mise_en_service(self):
         machine = Distributeur()
@@ -94,7 +116,7 @@ def mise_en_service(distributeur):
     return distributeur
 
 if __name__ == "__main__":
-    # unittest.main()
+    unittest.main()
     machine = Distributeur()
     print(machine)
     maintenance(machine)
