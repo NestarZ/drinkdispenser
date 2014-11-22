@@ -121,7 +121,7 @@ class Boite():
         self.__taille_max = value
 
     def tirer(self, nombre):
-        """Utilise l'Boite un nombre de fois détérminé (affecte les Boite)"""
+        """Utilise l'ingrédient un nombre de fois détérminé"""
         # Cette méthode (fonction) permet de simuler l'utilisation
         # de l'Boite dans le processus de conception d'une boisson
         # Le paramètre nombre correspond au nombre d'utilisation
@@ -134,7 +134,3 @@ class Boite():
         print("Stock({}):{} to {}".format(
             self, self.taille, self.taille - nombre))
         return [self.__boite.pop() for i in range(nombre)]
-
-
-class The:
-    nom = "thé"
