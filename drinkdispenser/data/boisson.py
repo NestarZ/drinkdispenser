@@ -8,30 +8,38 @@ except ImportError:
 
 
 class MetaBoisson(type):
+
     def __str__(cls):
         return cls.__name__
 
 
-# BOISSONS 
+# BOISSONS
 class Boisson(metaclass=MetaBoisson):
+
     """Classe mère de toutes les boissons"""
     # Je met les ingredients nécessaires et optionnels
-    #de la boisson dans deux tuples (ps:voir les enfants)
+    # de la boisson dans deux tuples (ps:voir les enfants)
     ingredients_de_base = tuple()
     ingredients_optionnels = tuple()
 
     def __str__(self):
         """Permet d'afficher le type de la boisson"""
-        #Lorsque j'affiche ou je demande de convertir
-        #ma boisson en chaine de caractère, l'element
-        #affiché sera le nom de la boisson (le nom de la classe).
-        #print(Boisson) => Boisson
-        #print(Cafe) => Cafe
-        #a = The; print(a) => The
-        with_lait = True in (isinstance(x, ingredient.Lait) for x in self.goblet) and not ingredient.Lait in type(
-            self).ingredients_de_base
-        with_sucre = True in (isinstance(x, ingredient.Sucre) for x in self.goblet) and not ingredient.Sucre in type(
-            self).ingredients_de_base
+        # Lorsque j'affiche ou je demande de convertir
+        # ma boisson en chaine de caractère, l'element
+        # affiché sera le nom de la boisson (le nom de la classe).
+        # print(Boisson) => Boisson
+        # print(Cafe) => Cafe
+        # a = The; print(a) => The
+        lait_optionnel = ingredient.Lait in type(self).ingredients_optionnels
+        with_lait = True in (
+            isinstance(
+                x,
+                ingredient.Lait) for x in self.goblet) and lait_optionnel
+        sucre_optionnel = ingredient.Sucre in type(self).ingredients_optionnels
+        with_sucre = True in (
+            isinstance(
+                x,
+                ingredient.Sucre) for x in self.goblet) and sucre_optionnel
         dose_sucre = sum(isinstance(x, ingredient.Sucre) for x in self.goblet)
         return "Et voici un {}{}{}{}!!".format(
             type(self).__name__,
@@ -51,28 +59,29 @@ class Boisson(metaclass=MetaBoisson):
 
     @classmethod
     def is_ingredients(cls, ingredients):
-        """Vérifie si les ingrédients correspond à la boisson"""
-        #Est-ce que les ingrédients en parametre sont dans les
-        #ingredients de base ou optionnels de la boisson ?
+        """Vérifie si les ingrédients correspondent à la boisson"""
+        # Est-ce que les ingrédients en parametre sont dans les
+        # ingredients de base ou optionnels de la boisson ?
         for ingredient in ingredients:
             if not (ingredient in cls.ingredients_de_base or
-                            ingredient in cls.ingredients_optionnels):
+                    ingredient in cls.ingredients_optionnels):
                 return False
-        #Est-ce que les ingredients de base de la boisson
-        #sont dans les ingredients en parametre ?
+        # Est-ce que les ingredients de base de la boisson
+        # sont dans les ingredients en parametre ?
         for ingredient in cls.ingredients_de_base:
-            if not ingredient in ingredients:
+            if ingredient not in ingredients:
                 return False
-        #Si oui je retourne la boisson
+        # Si oui je retourne la boisson
         return cls
 
 
 class The(Boisson):
+
     """Boisson Thé définie par ses ingrédients"""
     # Un Thé nécessite du thé comme ingrédient obligatoire (de base)
-    #on peut aussi y rajouter du lait ou du sucre.
-    #Tout les thés partageront ainsi les même ingrédients nécessaires
-    #ou optionnels à sa réalisation
+    # on peut aussi y rajouter du lait ou du sucre.
+    # Tout les thés partageront ainsi les même ingrédients nécessaires
+    # ou optionnels à sa réalisation
     nom = "Thé"
     ingredients_de_base = (ingredient.The,)
     ingredients_optionnels = (ingredient.Lait,
@@ -80,11 +89,12 @@ class The(Boisson):
 
 
 class Cafe(Boisson):
+
     """Boisson Café définie par ses ingrédients"""
     # Un Café nécessite du Café comme ingrédient obligatoire (de base)
-    #on peut aussi y rajouter du lait ou du sucre.
-    #Tout les cafés partageront ainsi les même ingrédients nécessaires
-    #ou optionnels à sa réalisation
+    # on peut aussi y rajouter du lait ou du sucre.
+    # Tout les cafés partageront ainsi les même ingrédients nécessaires
+    # ou optionnels à sa réalisation
     nom = "Cafe"
     ingredients_de_base = (ingredient.Cafe,)
     ingredients_optionnels = (ingredient.Lait,
@@ -92,11 +102,12 @@ class Cafe(Boisson):
 
 
 class Chocolat(Boisson):
+
     """Boisson Chocolat définie par ses ingrédients"""
     # Un Café nécessite du Chocolat comme ingrédient obligatoire
     #(de base) on peut aussi y rajouter du lait ou du sucre.
-    #Tout les chocolats partageront ainsi les même ingrédients nécessaires
-    #ou optionnels à sa réalisation
+    # Tout les chocolats partageront ainsi les même ingrédients nécessaires
+    # ou optionnels à sa réalisation
     nom = "Chocolat"
     ingredients_de_base = (ingredient.Chocolat,)
     ingredients_optionnels = (ingredient.Lait,
@@ -104,11 +115,12 @@ class Chocolat(Boisson):
 
 
 class Capuccino(Boisson):
+
     """Boisson Capuccino définie par ses ingrédients"""
     # Un Capuccino nécessite du Chocolat et du Café comme ingrédient
-    #obligatoire (de base) on peut aussi y rajouter du sucre MAIS PAS de lait
-    #Tout les capuccino partageront ainsi les même ingrédients nécessaires
-    #ou optionnels à sa réalisation
+    # obligatoire (de base) on peut aussi y rajouter du sucre MAIS PAS de lait
+    # Tout les capuccino partageront ainsi les même ingrédients nécessaires
+    # ou optionnels à sa réalisation
     nom = "Capuccino"
     ingredients_de_base = (ingredient.Chocolat,
                            ingredient.Cafe)
@@ -116,11 +128,12 @@ class Capuccino(Boisson):
 
 
 class Macciato(Boisson):
+
     """Boisson Macciato définie par ses ingrédients"""
     # Un Macciato nécessite du Chocolat, du Café et du Lait comme
-    #ingrédient obligatoire (de base) on peut aussi y rajouter du sucre.
-    #Tout les macciato partageront ainsi les même ingrédients nécessaires
-    #ou optionnels à sa réalisation
+    # ingrédient obligatoire (de base) on peut aussi y rajouter du sucre.
+    # Tout les macciato partageront ainsi les même ingrédients nécessaires
+    # ou optionnels à sa réalisation
     nom = "Macciato"
     ingredients_de_base = (ingredient.Chocolat,
                            ingredient.Cafe,

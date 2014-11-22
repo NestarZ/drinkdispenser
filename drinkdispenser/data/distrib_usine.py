@@ -9,8 +9,9 @@ except (ImportError, SystemError) as e:
     from ingredient import Cafe, Sucre, Lait, Chocolat, The
     from boite import Boite
     import boisson
-    
+
 # MACHINE MODE USINE
+
 
 class Distributeur:
 
@@ -25,8 +26,8 @@ class Distributeur:
         3: 'La consommation doit etre un tuple',
         4: 'La commande doit etre un tuple a valeur pour chaque boite.',
         5: 'La commande doit etre un tuple binaire.',
-        }
-    
+    }
+
     monnaie_acceptee = [
         '2Euros',
         '1Euro',
@@ -34,7 +35,7 @@ class Distributeur:
         '20Cents',
         '10Cent',
         '5Cent',
-        ]
+    ]
 
     def __str__(self):
 
@@ -56,7 +57,7 @@ class Distributeur:
             Lait.nom: Lait,
             Chocolat.nom: Chocolat,
             The.nom: The,
-            }
+        }
 
         # self.boites contient des boites (vides) de chaque ingredient que
         # le distributeur est cense gere, ainsi, boite.Lait() correspond a
@@ -65,10 +66,10 @@ class Distributeur:
         # me permet de recuperer une dose de Lait de la boite. Et la fonction
         # self.boites["Lait"].ajouter_stock(20) rajoute 20 doses de lait
         # dans la boite de Lait (self.boites["Lait"]).
-        
+
         self.__boites = {ingredient.nom: Boite(ingredient)
-                       for ingredient in self.ingredients.values()}
-        
+                         for ingredient in self.ingredients.values()}
+
         # self.boissons contient les definitions des boissons que le distributeur
         # est cense gere. Par le mot "definition" je veux dire que ce
         # ne sont pas des boissons "physiques" qui sont dans ce dictionnaire.
@@ -92,27 +93,28 @@ class Distributeur:
             boisson.Macciato.nom: boisson.Macciato,
             boisson.Chocolat.nom: boisson.Chocolat,
             boisson.The.nom: boisson.The,
-            }
+        }
 
-        # Caisse de monnaie : n-tuple qui correspond à la liste de monnaie_acceptee
-        
+        # Caisse de monnaie : n-tuple qui correspond à la liste de
+        # monnaie_acceptee
+
         self.__caisse = tuple(0 for v in Distributeur.monnaie_acceptee)
 
         # Historique des commandes envoyées à la machine et les actions
         # qui ont suivies
-        
+
         self.__historique = None
 
     # Protection des variables en lecture seule pour l'utilisateur
-    
+
     @property
     def caisse(self):
         return self.__caisse
-    
+
     @property
     def historique(self):
         return self.__historique
-    
+
     @property
     def boissons(self):
         return self.__boissons
@@ -120,19 +122,18 @@ class Distributeur:
     @property
     def boites(self):
         return self.__boites
-    
+
     @property
     def ingredients(self):
         return self.__ingredients
-    
+
     # Methodes partagées
 
-    
     @property
     def tarifs(self):
         """Recupere et affiche le prix des elements de
         chaque boite sous forme de dictionnaire"""
-        
+
         return {key: boite.prix_unitaire for key, boite
                 in self.boites.items()}
 
@@ -140,30 +141,25 @@ class Distributeur:
     def stocks(self):
         """Recupere et affiche chaque boite
         sous forme de dictionnaire"""
-        
+
         return {key: boite for key, boite in self.boites.items()}
 
-
     # Methodes du mode maintenance
-
 
     def changer_prix_unitaire(self, item, prix):
         """Change le prix unitaire d'un boite"""
 
-        self.boites[item].prix_unitaire = prix
-
+        self.boites[item.lower()].prix_unitaire = prix
 
     def prix_unitaire(self, item):
         """Retourne le prix unitaire d'un boite"""
 
-        return self.boites[item].prix_unitaire
-
+        return self.boites[item.lower()].prix_unitaire
 
     def set_max_stock(self, item, max_stock):
         """Determine le stock maximum d'un boite"""
 
-        self.boites[item].max_stock = max_stock
-
+        self.boites[item.lower()].max_stock = max_stock
 
     def reset(self):
         """Remet la machine dans son etat sortie d'usine
@@ -173,39 +169,37 @@ class Distributeur:
         self.__init__()
         self.__historique = hitorique
 
-
     def vider_caisse(self):
         """Vide la caisse : Met a zero le nombre de chaque piece"""
 
         self.__caisse = tuple(0 for v in Distributeur.monnaie_acceptee)
-        
 
     def get_stock(self, item):
         """Retourne le stock d'un boite"""
 
-        return self.boites[item]
+        return self.boites[item.lower()]
 
     def get_stock_size(self, item):
         """Retourne la taille du stock restant d'une boite"""
 
-        return self.boites[item].taille
+        return self.boites[item.lower()].taille
 
     def get_stock_max(self, item):
         """Retourne la taille maximum d'une boite"""
 
-        return self.boites[item].taille_max
+        return self.boites[item.lower()].taille_max
 
     def get_all_stock(self):
         """Retourne le stock de tout les boites"""
-        
+
         return {key: boite for key, boite in self.boites.items()}
 
     def remplir_stock(self, item):
         """Remplit au maximum le stock d'un boite"""
 
+        item = item.lower()
         self.boites[item].recharger_boite(self.ingredients[item],
-                                        self.boites[item].taille_max)
-
+                                          self.boites[item].taille_max)
 
     def remplir_tout_stock(self):
         """Remplit au maximum le stock de tout les boites"""
@@ -214,31 +208,28 @@ class Distributeur:
             boite.recharger_boite(boite.type_dingredient_acceptee,
                                   boite.taille_max)
 
-
     def ajouter_stock(self, quantite):
         """Remplit le stock d'un boite jusqu'a un certain niveau"""
 
         if quantite in range(self.boites[item].taille,
                              self.boites[item].taille_max + 1):
             self.boites[item].recharger_boite(self.ingredients[item],
-                    quantite)
-
+                                              quantite)
 
     def hitorique(self):
         """Affiche l'historique du distributeur"""
 
         return self.historique
 
-    #Methodes du mode fonctionnement
+    # Methodes du mode fonctionnement
     def verifier_commande(self, cmd):
         """Verifie puis formate le tuple binaire pour l'adapter a la machine"""
 
         assert isinstance(cmd, tuple), Distributeur.erreur[3]
         assert len(cmd) == len(self.boites) + 1, Distributeur.erreur[4]
         assert not False in (isinstance(i, int) and i in range(0, 2)
-            for i in cmd), Distributeur.erreur[5]
+                             for i in cmd), Distributeur.erreur[5]
         return True
-
 
     def formater_commande(self, cmd):
         """Verifie puis formate le tuple binaire pour l'adapter a la machine"""
@@ -251,18 +242,16 @@ class Distributeur:
             self.boites[The.nom]: cmd[3],
             self.boites[Cafe.nom]: (cmd[4] if not is_the else 0),
             self.boites[Chocolat.nom]: (cmd[5] if not is_the else 0),
-            }
+        }
 
     def get_boites(self, cmd):
         """Recupere (seulement) les ingredients commandes et les retournent"""
         return {nom: boite for nom, boite in
                 self.boites.items() if cmd[boite] > 0}
 
-
     def get_types_ingredient(self, boites):
         return [boite.type_dingredient_acceptee for boite in
                 boites.values()]
-
 
     def verifier_monnaie(self, monnaie):
         """Verifie que la machine peut bien encaisser le paiement"""
@@ -272,10 +261,8 @@ class Distributeur:
             Distributeur.erreur[2]
         return True
 
-
     def verifier_rendu_monnaie_possible(self, monnaie, prix):
         return monnaie
-
 
     def correspondance_boisson(self, type_des_ingredients):
         """Recherche une correspondance entre la commande
@@ -289,11 +276,9 @@ class Distributeur:
                 return boisson
         return False
 
-
     def get_prix_boisson(self, cmd):
         return sum(ing.get_prix_unitaire(value) for (ing, value) in
                    cmd.items())
-
 
     def verifier_stock_suffisant(self):
         """Verifie que les stocks sont sufisamment remplit
@@ -312,11 +297,11 @@ class Distributeur:
         boites_a_utiliser,
         cmd,
         boisson,
-        ):
+    ):
         """Utilise les boites necessaires et demandes pour
         concevoir la boisson desiree"""
 
-            # Utilise chaque boite demande pour concocter ma boisson
+        # Utilise chaque boite demande pour concocter ma boisson
 
         print('\nPreparation de la commande')
         boisson = boisson()
@@ -324,19 +309,17 @@ class Distributeur:
             ingredients = boite.tirer(cmd[boite])
             boisson.ajouter(ingredients)
         print('Preparation terminee')
-        print('=' * 5, boisson, '=' * 5, '\n')
-
+        print("{}{}{}".format('=' * 5, boisson, '=' * 5, '\n'))
 
     def rendre_monnaie(self, monnaie):
         return monnaie
 
-
     def commander(self, monnaie, commande):
         """Recoit, verifie et lance la commande"""
 
-            # Je verifie d'abord si la monnaie respecte les contraintes
-            # du distributeur, si oui alors monnaie_accepte sera Vrai
-            # sinon il sera Faux
+        # Je verifie d'abord si la monnaie respecte les contraintes
+        # du distributeur, si oui alors monnaie_accepte sera Vrai
+        # sinon il sera Faux
 
         commande_acceptee = self.verifier_commande(commande)
         if commande_acceptee:
@@ -358,11 +341,11 @@ class Distributeur:
                         # le prix de ma commande
 
                     prix = self.get_prix_boisson(_order)
-                    print('Prix({})={}C'.format('+'.join(boites_a_utiliser.keys()),
-                            prix))
+                    print(
+                        'Prix({})={}C'.format('+'.join(boites_a_utiliser.keys()), prix))
 
-                        # et je regarde si le distributeur peut me rendre
-                        # la monnaie (si besoin est)
+                    # et je regarde si le distributeur peut me rendre
+                    # la monnaie (si besoin est)
 
                     rendu_monnaie_possible = \
                         self.verifier_rendu_monnaie_possible(monnaie, prix)
@@ -372,12 +355,11 @@ class Distributeur:
                             # alors je prepare la commande et je la propose
                             # au client
 
-                        return self.preparer_commande(boites_a_utiliser,
-                                _order, boisson), rendu_monnaie_possible
+                        return self.preparer_commande(
+                            boites_a_utiliser, _order, boisson), rendu_monnaie_possible
 
             # Si une de toutes ces verifications n'est pas valide
             # alors je rend la monnaie
 
         print('Impossible. Rend la monnaie.')
         return self.rendre_monnaie(monnaie)
-

@@ -1,5 +1,6 @@
 #!/bin/python3
 class Ingredient:
+
     def __repr__(self):
         return type(self).nom
 
@@ -8,20 +9,20 @@ class Ingredient:
 
 
 class Cafe(Ingredient):
-    nom = "Café"
+    nom = "café"
 
 
 class The(Ingredient):
-    nom = "Thé"
+    nom = "thé"
 
 
 class Chocolat(Ingredient):
-    nom = "Chocolat"
+    nom = "chocolat"
 
 
 class Lait(Ingredient):
-    nom = "Lait"
+    nom = "lait"
 
 
 class Sucre(Ingredient):
-    nom = "Sucre"
+    nom = "sucre"

@@ -5,8 +5,9 @@ try:
 except (ImportError, SystemError) as e:
     print("Lancement du fichier distrib_mode en stand-alone")
     from distrib_usine import Distributeur
-    
+
 # MODES DE LA MACHINE
+
 
 class DistributeurFonctionnement(Distributeur):
 
@@ -27,41 +28,41 @@ class DistributeurFonctionnement(Distributeur):
         pass
 
     def __str__(self):
-        return DistributeurFonctionnement.state
+        return type(self).state
 
     def changer_prix_unitaire(self, item, prix):
-        raise DistributeurFonctionnement.exception('changer_prix_unitaire'
-                )
+        raise type(self).exception('changer_prix_unitaire'
+                                                   )
 
     def prix_unitaire(self, item):
-        raise DistributeurFonctionnement.exception('prix_unitaire')
+        raise type(self).exception('prix_unitaire')
 
     def set_max_stock(self, item, max_stock):
-        raise DistributeurFonctionnement.exception('set_max_stock')
+        raise type(self).exception('set_max_stock')
 
     def reset(self):
-        raise DistributeurFonctionnement.exception('reset')
+        raise type(self).exception('reset')
 
     def vider_caisse(self):
-        raise DistributeurFonctionnement.exception('vider_caisse')
+        raise type(self).exception('vider_caisse')
 
     def get_stock(self, item):
-        raise DistributeurFonctionnement.exception('get_stock')
+        raise type(self).exception('get_stock')
 
     def get_all_stock(self):
-        raise DistributeurFonctionnement.exception('get_all_stock')
+        raise type(self).exception('get_all_stock')
 
     def remplir_stock(self, item):
-        raise DistributeurFonctionnement.exception('remplir_stock')
+        raise type(self).exception('remplir_stock')
 
     def remplir_tout_stock(self):
-        raise DistributeurFonctionnement.exception('remplir_tout_stock')
+        raise type(self).exception('remplir_tout_stock')
 
     def ajouter_stock(self, niveau):
-        raise DistributeurFonctionnement.exception('ajout_stock')
+        raise type(self).exception('ajout_stock')
 
     def hitorique(self):
-        raise DistributeurFonctionnement.exception('hitorique')
+        raise type(self).exception('hitorique')
 
 
 class DistributeurMaintenance(Distributeur):
@@ -86,7 +87,7 @@ class DistributeurMaintenance(Distributeur):
         pass
 
     def __str__(self):
-        return DistributeurMaintenance.state
+        return type(self).state
 
     def verifier_commande(self, cmd):
         raise type(self).exception('verifier_commande')
@@ -117,7 +118,7 @@ class DistributeurMaintenance(Distributeur):
         boites,
         cmd,
         boisson,
-        ):
+    ):
         raise DistributeurFonctionnement.exception('preparer_commande')
 
     def rendre_monnaie(self, monnaie):
