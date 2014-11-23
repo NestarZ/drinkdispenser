@@ -12,7 +12,7 @@ class MetaBoisson(type):
     def __str__(cls):
         return cls.__name__
 
-
+DEBUG = False
 # BOISSONS
 class Boisson(metaclass=MetaBoisson):
 
@@ -48,14 +48,19 @@ class Boisson(metaclass=MetaBoisson):
             " avec {} morceaux de sucre".format(
                 dose_sucre) if with_sucre else '')
 
+    def __repr__(self):
+        return str(self)
+
     def __init__(self):
         self.goblet = list()
 
     def ajouter(self, ingredients):
         for ingredient in ingredients:
             self.goblet.append(ingredient)
-            print("Ajout de {} dans le goblet.".format(ingredient))
-        print("Goblet={}".format(self.goblet))
+            if DEBUG:
+                print("Ajout de {} dans le goblet.".format(ingredient))
+        if DEBUG:
+            print("Goblet={}".format(self.goblet))
 
     @classmethod
     def is_ingredients(cls, ingredients):

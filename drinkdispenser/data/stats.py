@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-class Stats:
+class Stats(object):
 
     def __init__(self, ingredients, boissons):
         self.boissons = boissons.values()
