@@ -89,6 +89,7 @@ class Boite(object):
         # Sucres, je vais réduire le Boite de 3 sucres. Seulement si
         # le Boite est suffisant. La verif (si le Boite est suffisant
         # ne se fait toutefois pas ici, c'est la machine qui le vérifie).
+        if nombre == 0: return []
         assert self.__boite, Boite.error[10]
         assert self.taille > nombre, Boite.error[11]
         if DEBUG:

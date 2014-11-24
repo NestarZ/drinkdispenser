@@ -43,3 +43,25 @@ Traceback (most recent call last):
     raise DistributeurFonctionnement.exception('reset')
 Exception: Action reset indisponnible en mode fonctionnement
 >>>
+
+>>> m = Distributeur()
+>>> m.changer_prix_unitaire('chocolat', 50)
+>>> m.remplir_stock('chocolat')
+>>> m.remplir_stock(5) #remplit les boites de centimes
+>>> m.remplir_stock(10)
+>>> m.remplir_stock(20)
+>>> m.remplir_stock(50)
+>>> m.commander((0,0,0,3,0,1), (0,0,0,0,0,1))
+
+envoyé> (0, 0, 0, 3, 0, 1)
+rendu1> (0, 0, 0, 0, 0, 0)
+rendu2> (0, 0, 0, 0, 1, 1) Préparation de la boisson (Prix=50)
+Et voici un Chocolat!!
+
+>>> m.changer_prix_unitaire('sucre', 10)
+>>> m.commander((0,0,0,3,0,1), (0,1,0,0,0,1,))
+
+envoyé> (0, 0, 0, 3, 0, 1)
+rendu1> (0, 0, 0, 0, 0, 0)
+rendu2> (0, 0, 0, 0, 0, 1) Préparation de la boisson (Prix=60)
+Et voici un Chocolat avec 1 morceaux de sucre!!

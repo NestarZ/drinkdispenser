@@ -294,9 +294,10 @@ class Distributeur:
         # ========== Preparation de la boisson ========== #
         boisson = boisson_type()
         for ingredient_type, quantity in order.items():
-            self.stats.conso_ingredient[ingredient_type] += quantity
-            ingredients = self.containers[ingredient_type.nom].tirer(quantity)
-            boisson.ajouter(ingredients)
+            if quantity > 0:
+                self.stats.conso_ingredient[ingredient_type] += quantity
+                ingredients = self.containers[ingredient_type.nom].tirer(quantity)
+                boisson.ajouter(ingredients)
         return boisson
 
     @mode("fonctionnement")
@@ -321,13 +322,13 @@ class Distributeur:
                                     _mtoUse, prix)
                             code = Distributeur.monnaie_acceptee.code
                             if _mtoReturn2:
-                                print("rendu2>",_mtoReturn2, "Préparation de la boisson")
+                                print("rendu2>",_mtoReturn2, "Préparation de la boisson (Prix={})".format(prix))
                                 self.caisse.mix(_mtoUse)
                                 return self.__preparer_commande(
                                     order, boisson_type, supplements)
                             print("rendu2>",_mtoUse,"Stock de pièces non suffisant")
                             return None
-                        print("rendu2>",_mtoUse,"Prix > à la somme des pièces entrées")
+                        print("rendu2>",_mtoUse,"Prix={} > à la somme des pièces entrées={}".format(prix,_mtoUse.somme))
                         return None
                     print("rendu2>",_mtoUse,"Aucune boisson de ce type")
                     return None
