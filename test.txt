@@ -44,6 +44,11 @@ Traceback (most recent call last):
 Exception: Action reset indisponnible en mode fonctionnement
 >>>
 
+
+
+
+
+
 >>> m = Distributeur()
 >>> m.changer_prix_unitaire('chocolat', 50)
 >>> m.remplir_stock('chocolat')
@@ -65,3 +70,35 @@ envoyé> (0, 0, 0, 3, 0, 1)
 rendu1> (0, 0, 0, 0, 0, 0)
 rendu2> (0, 0, 0, 0, 0, 1) Préparation de la boisson (Prix=60)
 Et voici un Chocolat avec 1 morceaux de sucre!!
+
+>>> m.statistiques()
+           Macciato   Capuccino  The        Cafe       Chocolat
+Vendu      0          0          0          0          2
++Lait%     0          0          0          0          0
+Vendu%     0          0          0          0          100
+Moy. Sucre 0          0          0          0          1
++Sucre%    0          0          0          0          50
+
+         Chocolat Sucre    Thé      Café     Lait
+#Conso   2        1        0        0        0
+%Conso   66       33       0        0        0
+
+>>> m.commander((0,0,0,1,0,1), (0,1,0,0,0,1,))
+
+envoyé> (0, 0, 0, 1, 0, 1)
+rendu1> (0, 0, 0, 0, 0, 0)
+rendu2> (0, 0, 0, 1, 0, 1) Prix=60 > à la somme des pièces entrées=25
+
+>>> m.remplir_tout_stock()
+>>> m.stocks
+{
+'sucre': Boite(100/100 dose(s) de sucre),
+50: Boite(100/100 pièce(s) de 50 centimes),
+'café': Boite(100/100 dose(s) de café),
+5: Boite(100/100 pièce(s) de 5 centimes),
+'lait': Boite(100/100 dose(s) de lait),
+20: Boite(100/100 pièce(s) de 20 centimes),
+10: Boite(100/100 pièce(s) de 10 centimes),
+'thé': Boite(100/100 dose(s) de thé),
+'chocolat': Boite(100/100 dose(s) de chocolat)
+}

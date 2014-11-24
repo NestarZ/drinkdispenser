@@ -26,11 +26,11 @@ class Boite(object):
 
     def __repr__(self):
         """Retourne la boite"""
-        return "Boite de {} {} de {} sur un maximum de {}".format(
+        return "Boite({}/{} {} de {})".format(
             self.taille,
+            self.taille_max,
             type(self).item_name,
-            self.type_ditem.nom,
-            self.taille_max)
+            self.type_ditem.nom)
 
     def __str__(self):
         return self.type_ditem.nom
