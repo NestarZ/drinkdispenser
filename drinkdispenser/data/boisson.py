@@ -14,6 +14,8 @@ class MetaBoisson(type):
 
 DEBUG = False
 # BOISSONS
+
+
 class Boisson(metaclass=MetaBoisson):
 
     """Classe mère de toutes les boissons"""
@@ -77,7 +79,11 @@ class Boisson(metaclass=MetaBoisson):
             if ingredient not in ingredients:
                 return False
         # Si oui je retourne la boisson
-        return cls
+        return True
+
+    @classmethod
+    def supplements(cls, ingredients):
+        return [ing for ing in ingredients if ing in cls.ingredients_optionnels]
 
 
 class The(Boisson):

@@ -18,12 +18,10 @@ except (ImportError, SystemError) as e:
 
 # MACHINE MODE USINE
 
+
 class Distributeur:
 
     """Distributeur de boissons chaudes, necessite des pieces de monnaie europeennes"""
-
-    # Tout les distributeurs partagent la meme liste de monnaie acceptee
-    # ansi que le meme dictionnaire d'erreur
 
     erreur = {
         1: 'La monnaie doit etre un tuple',
@@ -35,23 +33,14 @@ class Distributeur:
 
     monnaie_acceptee = Coins(Coin200, Coin100, Coin50, Coin20, Coin10, Coin5)
     monnaie_container = Coins(Coin50, Coin20, Coin10, Coin5)
-    somme_maximum = Coin200.value
+    somme_max = Coin200.value
 
     def __str__(self):
-
-        # machine = Distributeur()
-        # print(machine) => Distributeur en mode usine
-
         return 'Distributeur en mode usine'
 
     def __init__(self, debug=False):
         """Construit le distributeur et integre ses composantes
         (boites, stock, tarifs, caisse)"""
-        self.debug = debug
-        if self.debug:
-            print("Creation d'un distributeur")
-        # self.ingredients contient des definitions de chaque ingredient que le
-        # distributeur est censé geré.
 
         self.__ingredients = {
             Cafe.nom: Cafe,
@@ -60,40 +49,12 @@ class Distributeur:
             Chocolat.nom: Chocolat,
             The.nom: The,
         }
-
-        # self.containers contient des boites (vides) de chaque ingredient que
-        # le distributeur est cense gere, ainsi, boite.Lait() correspond a
-        # une boite de Lait (vide car les stock ne sont pas initialement remplis)
-        # et par exemple la fonction self.containers["Lait"].utiliser(1)
-        # me permet de recuperer une dose de Lait de la boite. Et la fonction
-        # self.containers["Lait"].ajouter_stock(20) rajoute 20 doses de lait
-        # dans la boite de Lait (self.containers["Lait"]).
-
-        self.__product_containers = {ingredient.nom: BoiteProduit(ingredient)
-                                     for ingredient in self.ingredients.values()}
-
+        self.__product_containers = {
+            ingredient.nom: BoiteProduit(ingredient)
+            for ingredient in self.ingredients.values()}
         self.__change_containers = Coins(Coin50, Coin20, Coin10, Coin5)
-
         self.__containers = self.__change_containers.get_dict()
         self.__containers.update(self.__product_containers)
-
-        # self.boissons contient les definitions des boissons que le distributeur
-        # est cense gere. Par le mot "definition" je veux dire que ce
-        # ne sont pas des boissons "physiques" qui sont dans ce dictionnaire.
-        # Ils s'agit en fait la recette de la boisson.
-        # Si (par exemple) je veux creer deux cafes differents a partir de la recette,
-        # je dois faire:
-        # recette_du_cafe = self.boissons['Cafe']
-        # cafe1 = recette_du_cafe()
-        # cafe2 = recette_du_cafe()
-        # cafe1 et cafe2 seront donc deux unites distinctes physiquement presentes
-        # mais vides en fait cafe1.goblet est vide (resp. cafe2)
-        # et si je veux remplir mon cafe je dois faire
-        # cafe1.ajouter([Cafe, Sucre])
-        # si l'ingredient est conforme a la definition d'un cafe
-        # alors l'ingredient sera rajouté dans le goblet,
-        # sinon une erreur sera levé.
-
         self.__boissons = {
             boisson.Cafe.nom: boisson.Cafe,
             boisson.Capuccino.nom: boisson.Capuccino,
@@ -101,15 +62,7 @@ class Distributeur:
             boisson.Chocolat.nom: boisson.Chocolat,
             boisson.The.nom: boisson.The
         }
-
-        # Caisse de monnaie : n-tuple qui correspond à la liste de
-        # monnaie_acceptee
-
         self.__caisse = Coins(Coin200, Coin100, Coin50, Coin20, Coin10, Coin5)
-
-        # Historique des commandes envoyées à la machine et les actions
-        # qui ont suivies
-
         self.__historique = list()
         self.__stats = Stats(self.__ingredients, self.__boissons)
         self.commande_en_cours = False
@@ -122,7 +75,6 @@ class Distributeur:
             return func_wrapper
         return hist_decorate
 
-    # Protection des variables en lecture seule pour l'utilisateur
     @property
     def stats(self):
         return self.__stats
@@ -155,8 +107,6 @@ class Distributeur:
     def ingredients(self):
         return self.__ingredients
 
-    # Methodes partagées
-
     @property
     def tarifs(self):
         """Recupere et affiche le prix des elements de
@@ -172,7 +122,6 @@ class Distributeur:
 
         return {key: boite for key, boite in self.containers.items()}
 
-    # Methodes du mode maintenance
     @mode("maintenance")
     def changer_prix_unitaire(self, item, prix):
         """Change le prix unitaire d'un boite"""
@@ -233,7 +182,8 @@ class Distributeur:
     @mode("maintenance")
     def remplir_stock(self, item):
         """Remplit au maximum le stock d'un boite"""
-        assert item in self.containers, "Container inexistant : {}".format(item)
+        assert item in self.containers, "Container inexistant : {}".format(
+            item)
         self.containers[item].recharger(self.containers[item].taille_max)
 
     @mode("maintenance")
@@ -261,7 +211,6 @@ class Distributeur:
     def statistiques(self):
         return self.stats.display_all()
 
-    # Methodes du mode fonctionnement
     def __verifier_commande(self, cmd):
         """Verifie puis formate le tuple binaire pour l'adapter a la machine"""
 
@@ -272,7 +221,7 @@ class Distributeur:
                              for i in cmd), Distributeur.erreur[5]
         return True
 
-    def __formater_commande(self, cmd):
+    def trad(self, cmd):
         """Verifie puis formate le tuple binaire pour l'adapter a la machine"""
 
         sucre = int('{}{}'.format(cmd[0], cmd[1]), 2)
@@ -298,32 +247,13 @@ class Distributeur:
         assert isinstance(monnaie, tuple), Distributeur.erreur[1]
         assert len(monnaie) == len(Distributeur.monnaie_acceptee), \
             Distributeur.erreur[2]
-        code = Distributeur.monnaie_acceptee.code
-        maxi = Distributeur.somme_maximum
-        if get_change.trad(monnaie, code) > maxi:
-            _, sol = get_change.getSol(maxi, monnaie, code, len(monnaie))
-            if get_change.trad(sol, code) <= maxi:
-                return _, sol
-            else:
-                return monnaie, None
-        return None, monnaie
+        return self.caisse.calcul_change(monnaie, Distributeur.somme_max)
 
-    def montant_change_container(self):
-        return tuple(val for val, boite in self.change_containers.items())
+    def __verifier_rendu_monnaie_possible(self, mtoUse, prix):
+        total = mtoUse.somme - prix
+        return self.change_containers.do_change(total)
 
-    def __verifier_rendu_monnaie_possible(self, prix):
-        somme = self.change_containers.somme
-        if somme >= prix:
-            code = self.change_containers.code
-            montant = self.change_containers.montant
-            _, sol = get_change.getSol(prix, montant, code, len(montant))
-            if get_change.trad(sol, code) == prix:
-                print(_, sol)
-                return _, sol
-        print("Pas assez de pièce dans les containers")
-        return None, None
-
-    def __correspondance_boisson(self, order):
+    def match(self, order):
         """Recherche une correspondance entre la commande
         et une boisson, renvoi la boisson si trouve"""
 
@@ -332,7 +262,8 @@ class Distributeur:
         order = [ing for ing, quantity in order.items() if quantity > 0]
         for boisson in self.boissons.values():
             if boisson.is_ingredients(order):
-                return boisson
+                return boisson, boisson.supplements(order)
+        return None, None
 
     def __get_prix_boisson(self, order):
         return sum(
@@ -340,106 +271,68 @@ class Distributeur:
                 ing.nom].get_prix_unitaire(value) for ing,
             value in order.items())
 
-    def __verifier_stock_suffisant(self):
+    def __verifier_stock_suffisant(self, boites_a_utiliser, order):
         """Verifie que les stocks sont sufisamment remplit
         pour satisfaire la commande"""
 
-        # Pour chaque boite si le stock est inferieur a la
-        # demande je retourne faux
-
-        for (key, boite) in self.containers.items():
-            if boite.taille <= self.consommation[key]:
+        for (key, boite) in boites_a_utiliser.items():
+            if boite.taille <= order[boite.type_ditem]:
                 return False
         return True
 
-    def __encaisser(self, mtoContainer):
-        pass
-
-    def __preparer_commande(
-        self,
-        order,
-        boisson_type,
-    ):
+    def __preparer_commande(self, order, boisson_type, supplements):
         """Utilise les boites necessaires et demandes pour
         concevoir la boisson desiree"""
 
-        # Utilise chaque boite demande pour concocter ma boisson
-
-        if self.debug:
-            print('\nPreparation de la commande')
+        # ========== MAJ des Statistiques ==========
         self.stats.nb_vendu[boisson_type] += 1
+        if Sucre in supplements:
+            quantity = order[Sucre]
+            self.stats.dose_sucre[boisson_type].append(quantity)
+        if Lait in supplements:
+            self.stats.with_lait[boisson_type] += 1
+        # ========== Preparation de la boisson ========== #
         boisson = boisson_type()
         for ingredient_type, quantity in order.items():
-            if ingredient_type == Sucre:
-                self.stats.dose_sucre[boisson_type].append(quantity)
-            if ingredient_type == Lait and not Lait in boisson.ingredients_de_base:
-                self.stats.with_lait[boisson_type] += quantity
             self.stats.conso_ingredient[ingredient_type] += quantity
             ingredients = self.containers[ingredient_type.nom].tirer(quantity)
             boisson.ajouter(ingredients)
-        if self.debug:
-            print('Preparation terminee')
-            print("{}{}{}".format('=' * 5, boisson, '=' * 5, '\n'))
         return boisson
 
-    def __retourner_monnaie(self, *args):
-        args = [arg for arg in args if arg]
-        return [sum(p) for p in zip(*args)]
-
     @mode("fonctionnement")
-    def commander(self, monnaie, commande):
+    def commander(self, monnaie=None, commande=None):
         """Recoit, verifie et lance la commande"""
-        _mtoReturn1 = (0 for p in monnaie)
-        _mtoReturn2 = (0 for p in monnaie)
-        _mtoUse = (0 for p in monnaie)
-        # Je verifie d'abord si la monnaie respecte les contraintes
-        # du distributeur, si oui alors monnaie_accepte sera Vrai
-        # sinon il sera Faux
-        self.commande_en_cours = True
+        assert monnaie and commande, "Must enter two 6-uplet, (2nd must be binary)"
+        print("\nenvoyé>", monnaie)
         _commande_acceptee = self.__verifier_commande(commande)
         if _commande_acceptee:
             _mtoReturn1, _mtoUse = self.__verifier_monnaie(monnaie)
             if _mtoUse:
-
-                # Si la monnaie est bonne, alors je regarde si je peux
-                # trouver une boisson qui correspond a la commande
-                # si oui, alors je recupere cette boisson
-
-                order = self.__formater_commande(commande)
+                print("rendu1>", _mtoReturn1)
+                order = self.trad(commande)
                 boites_a_utiliser = self.__get_boites(order)
-                boisson_type = self.__correspondance_boisson(order)
-                if boisson_type:
-
-                        # Si j'ai recupere une boisson, alors je calcul
-                        # le prix de ma commande
-
-                    prix = self.__get_prix_boisson(order)
-                    if self.debug:
-                        print(
-                            'Prix({})={}C'.format(
-                                '+'.join(boites_a_utiliser.keys()),
-                                prix))
-
-                    # et je regarde si le distributeur peut me rendre
-                    # la monnaie (si besoin est)
-                    if get_change.trad(_mtoUse, Distributeur.monnaie_acceptee.code) >= prix:
-                        if self.debug: print("Vous n'avez pas assez.")
-                        _mtoReturn2, _mtoContainer = \
-                            self.__verifier_rendu_monnaie_possible(prix)
-                        if _mtoContainer:
-
-                                # si je peux rendre la monnaie (si besoin)
-                                # alors je prepare la commande et je la propose
-                                # au client
-                            self.commande_en_cours = False
-                            self.__encaisser(_mtoContainer)
-                            return self.__preparer_commande(
-                                order, boisson_type), self.__retourner_monnaie(_mtoReturn1, _mtoReturn2)
-
-            # Si une de toutes ces verifications n'est pas valide
-            # alors je rend la monnaie
-
+                if self.__verifier_stock_suffisant(boites_a_utiliser, order):
+                    boisson_type, supplements = self.match(order)
+                    if boisson_type:
+                        prix = self.__get_prix_boisson(order)
+                        if _mtoUse.somme >= prix:
+                            _mtoReturn2 = \
+                                self.__verifier_rendu_monnaie_possible(
+                                    _mtoUse, prix)
+                            code = Distributeur.monnaie_acceptee.code
+                            if _mtoReturn2:
+                                print("rendu2>",_mtoReturn2, "Préparation de la boisson")
+                                self.caisse.mix(_mtoUse)
+                                return self.__preparer_commande(
+                                    order, boisson_type, supplements)
+                            print("rendu2>",_mtoUse,"Stock de pièces non suffisant")
+                            return None
+                        print("rendu2>",_mtoUse,"Prix > à la somme des pièces entrées")
+                        return None
+                    print("rendu2>",_mtoUse,"Aucune boisson de ce type")
+                    return None
+                print("rendu2>",_mtoUse,"Stock d'ingrédient non suffisant")
+                return None
         self.commande_en_cours = False
-        if self.debug:
-            print('Impossible. Rend la monnaie.')
-        return None, self.__retourner_monnaie(monnaie)
+        print("rendu2>",monnaie, "Commande erronée")
+        return None

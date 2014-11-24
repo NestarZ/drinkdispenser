@@ -74,7 +74,7 @@ def getSol(toReach, entree, code, sz, debug=False):
     return _change, _used
 
 
-def trad(m, v):
+def trad(m, v=(200, 100, 50, 20, 10)):
     _v = v
     _sz = len(_v)
     return sum([m[_] * _v[_] for _ in range(_sz)])

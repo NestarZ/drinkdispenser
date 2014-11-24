@@ -2,6 +2,8 @@
 # Boite
 
 DEBUG = False
+
+
 class Boite(object):
 
     """Boite"""
@@ -91,7 +93,7 @@ class Boite(object):
         assert self.taille > nombre, Boite.error[11]
         if DEBUG:
             print("Stock({}):{} to {}".format(
-            self, self.taille, self.taille - nombre))
+                self, self.taille, self.taille - nombre))
         return [self.__boite.pop() for i in range(nombre)]
 
 
@@ -100,6 +102,7 @@ class BoitePiece(Boite):
 
     def vider(self):
         self.__boite = []
+
 
 class BoiteProduit(Boite):
     item_name = 'dose(s)'

@@ -11,124 +11,134 @@ from data.distrib_mode import DistributeurFonctionnement
 import unittest
 
 DEBUG = True
+m = Distributeur()
 
 
 class TestDistributeur(unittest.TestCase):
 
     def test_unicite(self):
-        machine1 = Distributeur()
-        machine2 = Distributeur()
-        self.assertNotEqual(machine1, machine2)
+        m1 = Distributeur()
+        m2 = Distributeur()
+        self.assertNotEqual(m1, m2)
 
     def test_remplir_tout_stock(self):
-        machine = Distributeur()
-        machine.remplir_tout_stock()
-        for produit in machine.ingredients:
-            stock_size = machine.get_stock_size(produit)
-            stock_max_size = machine.get_stock_max(produit)
+        m = Distributeur()
+        m.remplir_tout_stock()
+        for produit in m.ingredients:
+            stock_size = m.get_stock_size(produit)
+            stock_max_size = m.get_stock_max(produit)
             self.assertEqual(stock_size, stock_max_size)
 
     def test_remplir_stock(self):
-        machine = Distributeur()
-        for produit in machine.ingredients:
-            machine.remplir_stock(produit)
-            stock_size = machine.get_stock_size(produit)
-            stock_max_size = machine.get_stock_max(produit)
+        m = Distributeur()
+        for produit in m.ingredients:
+            m.remplir_stock(produit)
+            stock_size = m.get_stock_size(produit)
+            stock_max_size = m.get_stock_max(produit)
             self.assertEqual(stock_size, stock_max_size)
 
     def test_vider_caisse(self):
-        machine = Distributeur()
-        machine.vider_caisse()
-        self.assertEqual(machine.caisse.somme, 0)
+        m = Distributeur()
+        m.vider_caisse()
+        self.assertEqual(m.caisse.somme, 0)
 
     def test_changer_prix(self):
-        machine = Distributeur()
+        m = Distributeur()
         prix = {0: 0, 1: 100}
-        for produit in machine.ingredients:
-            machine.changer_prix_unitaire(produit, prix)
-            self.assertEqual(prix, machine.prix_unitaire(produit))
+        for produit in m.ingredients:
+            m.changer_prix_unitaire(produit, prix)
+            self.assertEqual(prix, m.prix_unitaire(produit))
 
         prix = 50
-        for produit in machine.ingredients:
-            machine.changer_prix_unitaire(produit, prix)
-            prix_unitaire = machine.prix_unitaire(produit)
+        for produit in m.ingredients:
+            m.changer_prix_unitaire(produit, prix)
+            prix_unitaire = m.prix_unitaire(produit)
             self.assertEqual({0: 0, 1: prix}, prix_unitaire)
 
         # Prix pour des doses inférieurs à 3 (!=0) non déf.
         prix = {3: 10, 4: 20}
-        for produit in machine.ingredients:
+        for produit in m.ingredients:
             with self.assertRaises(AssertionError) as cm:
-                machine.changer_prix_unitaire(produit, prix)
-                prix_unitaire = machine.prix_unitaire(produit)
+                m.changer_prix_unitaire(produit, prix)
+                prix_unitaire = m.prix_unitaire(produit)
             the_exception = cm.exception
 
         prix = "10"
-        for produit in machine.ingredients:
+        for produit in m.ingredients:
             with self.assertRaises(Exception) as cm:
-                machine.changer_prix_unitaire(produit, prix)
-                prix_unitaire = machine.prix_unitaire(produit)
+                m.changer_prix_unitaire(produit, prix)
+                prix_unitaire = m.prix_unitaire(produit)
             the_exception = cm.exception
 
     def test_commander(self):
-        machine = Distributeur()
-        machine.remplir_tout_stock()
-        with self.assertRaises(AssertionError) as cm:
-            boisson, monnaie = machine.commander(
-                (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
-        machine.changer_prix_unitaire("thé", 10)
-        machine.changer_prix_unitaire("lait", 5)
-        machine.changer_prix_unitaire("sucre", {1: 5, 2: 5, 3: 15})
-        boisson, monnaie = machine.commander(
-            (0, 0, 0, 0, 100, 200), (1, 1, 1, 1, 1, 1))
-        print("rendu_fin",monnaie)
-        boisson, monnaie = machine.commander(
-            (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
-        print("rendu_fin",monnaie)
+        m = Distributeur()
+        prev_somme = m.caisse.somme
+        m.remplir_tout_stock()
+        # with self.assertRaises(AssertionError) as cm:
+        #    boisson, monnaie = m.commander(
+        #        (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
+        m.changer_prix_unitaire("thé", 10)
+        m.changer_prix_unitaire("lait", 5)
+        m.changer_prix_unitaire("sucre", {1: 5, 2: 5, 3: 15})
+        boisson = m.commander((0, 0, 0, 0, 2, 3), (1, 1, 1, 1, 1, 1))
         from data.boisson import The
         self.assertIsInstance(boisson, The)
+        self.assertEqual(prev_somme, m.caisse.somme - 35)
+
+    def test_correspondance_boisson(self):
+        m = Distributeur()
+        boisson_cmd = m.trad((1, 1, 1, 1, 1, 1))
+        boisson_type, supplements = m.match(boisson_cmd)
+        from data.boisson import The
+        self.assertEqual(boisson_type, The)
+        from data.ingredient import Cafe, Sucre, Lait, Chocolat
+        self.assertIn(Sucre, supplements)
+        self.assertIn(Lait, supplements)
+        self.assertNotIn(Cafe, supplements)
+        self.assertNotIn(Chocolat, supplements)
 
     def test_mise_en_service(self):
-        machine = Distributeur()
-        self.assertNotIsInstance(machine, DistributeurFonctionnement)
-        mise_en_service(machine)
-        self.assertIsInstance(machine, Distributeur)
-        self.assertIsInstance(machine, DistributeurFonctionnement)
+        m = Distributeur()
+        self.assertNotIsInstance(m, DistributeurFonctionnement)
+        mise_en_service(m)
+        self.assertIsInstance(m, Distributeur)
+        self.assertIsInstance(m, DistributeurFonctionnement)
 
     def test_mise_en_maintenance(self):
-        machine = Distributeur()
-        self.assertNotIsInstance(machine, DistributeurMaintenance)
-        maintenance(machine)
-        self.assertIsInstance(machine, Distributeur)
-        self.assertIsInstance(machine, DistributeurMaintenance)
+        m = Distributeur()
+        self.assertNotIsInstance(m, DistributeurMaintenance)
+        maintenance(m)
+        self.assertIsInstance(m, Distributeur)
+        self.assertIsInstance(m, DistributeurMaintenance)
 
     @unittest.skip("not now")
     def test_statistiques(self):
-        machine = Distributeur()
-        machine.reset()
-        machine.remplir_tout_stock()
-        machine.changer_prix_unitaire("Café", 10)
-        machine.changer_prix_unitaire("Chocolat", 5)
-        machine.changer_prix_unitaire("Thé", 10)
-        machine.changer_prix_unitaire("Lait", 5)
-        machine.changer_prix_unitaire("Sucre", {1: 5, 2: 5, 3: 15})
-        boisson, monnaie = machine.commander(
+        m = Distributeur()
+        m.reset()
+        m.remplir_tout_stock()
+        m.changer_prix_unitaire("Café", 10)
+        m.changer_prix_unitaire("Chocolat", 5)
+        m.changer_prix_unitaire("Thé", 10)
+        m.changer_prix_unitaire("Lait", 5)
+        m.changer_prix_unitaire("Sucre", {1: 5, 2: 5, 3: 15})
+        boisson, monnaie = m.commander(
             (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
-        machine.statistiques()
-        boisson, monnaie = machine.commander(
+        m.statistiques()
+        boisson, monnaie = m.commander(
             (1, 1, 1, 1, 1, 1), (1, 0, 0, 0, 1, 1))
-        machine.statistiques()
-        boisson, monnaie = machine.commander(
+        m.statistiques()
+        boisson, monnaie = m.commander(
             (1, 1, 1, 1, 1, 1), (0, 0, 1, 0, 1, 0))
-        machine.statistiques()
-        boisson, monnaie = machine.commander(
+        m.statistiques()
+        boisson, monnaie = m.commander(
             (1, 1, 1, 1, 1, 1), (0, 0, 1, 0, 1, 1))
-        machine.statistiques()
+        m.statistiques()
 
 
 def maintenance(distributeur):
     assert isinstance(distributeur, Distributeur), \
         "Le parametre n'est pas un distributeur."
-    assert not distributeur.commande_en_cours, "La machine traite une commande"
+    assert not distributeur.commande_en_cours, "La m traite une commande"
     if not isinstance(distributeur, DistributeurMaintenance):
         return DistributeurMaintenance(distributeur)
     return distributeur
@@ -142,8 +152,10 @@ def mise_en_service(distributeur):
     return distributeur
 
 if __name__ == "__main__":
+    m = Distributeur()
+    m.changer_prix_unitaire("chocolat", 30)
+    m.changer_prix_unitaire("café", 20)
+    m.changer_prix_unitaire("thé", 10)
+    m.changer_prix_unitaire("lait", 5)
+    m.changer_prix_unitaire("sucre", {1: 5, 2: 15, 3: 15})
     unittest.main()
-    machine = Distributeur()
-    print(machine)
-    maintenance(machine)
-    print(machine)
