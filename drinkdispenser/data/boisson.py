@@ -12,6 +12,9 @@ class MetaBoisson(type):
     def __str__(cls):
         return cls.__name__
 
+    def __iter__(cls):
+        return cls.ingredients_de_base.__iter__()
+
 DEBUG = False
 # BOISSONS
 

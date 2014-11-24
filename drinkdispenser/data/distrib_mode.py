@@ -3,8 +3,7 @@
 try:
     from .distrib_usine import Distributeur
 except (ImportError, SystemError) as e:
-    print("Lancement du fichier distrib_mode en stand-alone")
-    from .distrib_usine import Distributeur
+    from distrib_usine import Distributeur
 
 # MODES DE LA MACHINE
 

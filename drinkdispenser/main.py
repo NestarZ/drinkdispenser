@@ -80,7 +80,7 @@ class TestDistributeur(unittest.TestCase):
         m.changer_prix_unitaire("thé", 10)
         m.changer_prix_unitaire("lait", 5)
         m.changer_prix_unitaire("sucre", {1: 5, 2: 5, 3: 15})
-        boisson = m.commander((0, 0, 0, 0, 2, 3), (1, 1, 1, 1, 1, 1))
+        boisson, monnaie1, monnaie2 = m.commander((0, 0, 0, 0, 2, 3), (1, 1, 1, 1, 1, 1))
         from data.boisson import The
         self.assertIsInstance(boisson, The)
         self.assertEqual(prev_somme, m.caisse.somme - 35)
@@ -111,30 +111,45 @@ class TestDistributeur(unittest.TestCase):
         self.assertIsInstance(m, Distributeur)
         self.assertIsInstance(m, DistributeurMaintenance)
 
-    @unittest.skip("not now")
     def test_statistiques(self):
         m = Distributeur()
         m.reset()
         m.remplir_tout_stock()
-        m.changer_prix_unitaire("Café", 10)
-        m.changer_prix_unitaire("Chocolat", 5)
-        m.changer_prix_unitaire("Thé", 10)
-        m.changer_prix_unitaire("Lait", 5)
-        m.changer_prix_unitaire("Sucre", {1: 5, 2: 5, 3: 15})
-        boisson, monnaie = m.commander(
-            (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
-        m.statistiques()
-        boisson, monnaie = m.commander(
-            (1, 1, 1, 1, 1, 1), (1, 0, 0, 0, 1, 1))
-        m.statistiques()
-        boisson, monnaie = m.commander(
-            (1, 1, 1, 1, 1, 1), (0, 0, 1, 0, 1, 0))
-        m.statistiques()
-        boisson, monnaie = m.commander(
-            (1, 1, 1, 1, 1, 1), (0, 0, 1, 0, 1, 1))
-        m.statistiques()
-
-
+        m.changer_prix_unitaire("café", 10)
+        m.changer_prix_unitaire("chocolat", 5)
+        m.changer_prix_unitaire("thé", 10)
+        m.changer_prix_unitaire("lait", 5)
+        m.changer_prix_unitaire("sucre", {1: 5, 2: 5, 3: 15})
+        m.commander((1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
+        self.assertEqual(m.stats.nb_vendu["Thé"], 1)
+        self.assertEqual(m.stats.conso_ingredient["thé"], 1)
+        self.assertEqual(m.stats.conso_ingredient["sucre"], 3)
+        self.assertEqual(m.stats.conso_ingredient["lait"], 1)
+        self.assertEqual(m.stats.conso_ingredient["chocolat"], 0)
+        self.assertEqual(m.stats.conso_ingredient["café"], 0)
+        self.assertEqual(m.stats.mean_sucre["Thé"], 3)
+        m.commander((1, 1, 1, 1, 1, 1), (1, 0, 0, 1, 0, 1))
+        self.assertEqual(m.stats.nb_vendu["Thé"], 2)
+        self.assertEqual(m.stats.conso_ingredient["thé"], 2)
+        self.assertEqual(m.stats.conso_ingredient["sucre"], 5)
+        self.assertEqual(m.stats.conso_ingredient["lait"], 1)
+        self.assertEqual(m.stats.conso_ingredient["chocolat"], 0)
+        self.assertEqual(m.stats.conso_ingredient["café"], 0)
+        self.assertEqual(m.stats.mean_sucre["Thé"], 2)
+        self.assertEqual(m.stats.with_lait["Thé"], 1)
+        self.assertEqual(m.stats.prop_with_lait["Thé"], 50)
+        self.assertEqual(m.stats.prop_with_sucre["Thé"], 100)
+        m.commander((2, 0, 0, 0, 0, 0), (0, 1, 1, 0, 1, 1))
+        self.assertEqual(m.stats.nb_vendu["Macciato"], 1)
+        self.assertEqual(m.stats.with_lait["Macciato"], 1)
+        self.assertEqual(m.stats.prop_with_lait["Macciato"], 100)
+        m.commander((2, 0, 0, 0, 0, 0), (0, 0, 1, 0, 1, 1))
+        self.assertEqual(m.stats.nb_vendu["Macciato"], 2)
+        self.assertEqual(m.stats.with_lait["Macciato"], 2)
+        self.assertEqual(m.stats.mean_sucre["Macciato"], 1)
+        self.assertEqual(m.stats.prop_with_lait["Macciato"], 100)
+        self.assertEqual(m.stats.prop_with_sucre["Macciato"], 50)
+        
 def maintenance(distributeur):
     assert isinstance(distributeur, Distributeur), \
         "Le parametre n'est pas un distributeur."
