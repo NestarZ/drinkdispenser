@@ -11,8 +11,6 @@ from data.distrib_mode import DistributeurFonctionnement
 import unittest
 
 DEBUG = True
-m = Distributeur()
-
 
 class TestDistributeur(unittest.TestCase):
 
@@ -110,6 +108,21 @@ class TestDistributeur(unittest.TestCase):
         maintenance(m)
         self.assertIsInstance(m, Distributeur)
         self.assertIsInstance(m, DistributeurMaintenance)
+
+    def test_calcul_prix_boisson(self):
+        m = Distributeur()
+        m.changer_prix_unitaire("chocolat", 30)
+        m.changer_prix_unitaire("café", 20)
+        m.changer_prix_unitaire("lait", 5)
+        m.changer_prix_unitaire("sucre", {1: 5, 2: 5, 3: 15})
+        prix = m.calculer_prix_boisson((1, 1, 1, 0, 1, 1)) #permet de calculer le prix de la boisson
+        self.assertEqual(prix, 30+20+5+15)
+
+    def test_reset(self):
+        pass
+
+    def test_trad(self):
+        pass
 
     def test_statistiques(self):
         m = Distributeur()

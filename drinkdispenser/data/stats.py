@@ -12,7 +12,15 @@ class Stats(object):
         self.with_lait = {boisson.nom: 0 for boisson in self.boissons}
         self.conso_ingredient = {
             ingredient.nom: 0 for ingredient in self.ingredients}
+        self.montant_gagne = {boisson.nom: 0 for boisson in self.boissons}
 
+    @property
+    def mean_montant_gagne(self):
+        return {
+            boisson: int(
+                total / self.nb_vendu[boisson]) if self.nb_vendu[boisson] > 0 else 0
+            for boisson, total in self.montant_gagne.items()}
+    
     @property
     def mean_sucre(self):
         return {
@@ -64,7 +72,9 @@ class Stats(object):
                  "Moy. Sucre": self.mean_sucre,
                  "+Lait%": self.prop_with_lait,
                  "+Sucre%": self.prop_with_sucre,
-                 "Vendu%": self.prop_vendu}
+                 "Vendu%": self.prop_vendu,
+                  "Total gagné": self.montant_gagne,
+                  "Moy. Gagné": self.mean_montant_gagne}
         str_stat1 = self.display(self.boissons, stats1)
 
         stats2 = {"#Conso": self.conso_ingredient,

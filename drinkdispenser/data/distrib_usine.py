@@ -4,6 +4,7 @@ try:
     from .coin import Coins, Coin200, Coin100, Coin50, Coin20, Coin10, Coin5
     from .ingredient import Cafe, Sucre, Lait, Chocolat, The
     from .boite import BoitePiece, BoiteProduit
+    from .tarifs import Tarifs
     from .stats import Stats
     from . import boisson
     from . import get_change
@@ -11,6 +12,7 @@ except (ImportError, SystemError) as e:
     from coin import Coins, Coin200, Coin100, Coin50, Coin20, Coin10, Coin5
     from ingredient import Cafe, Sucre, Lait, Chocolat, The
     from boite import BoitePiece, BoiteProduit
+    from tarifs import Tarifs
     from stats import Stats
     import boisson
     import get_change
@@ -50,6 +52,9 @@ class Distributeur:
         }
         self.__product_containers = {
             ingredient.nom: BoiteProduit(ingredient)
+            for ingredient in self.ingredients.values()}
+        self.__dict_tarifs = {
+            ingredient.nom: Tarifs(ingredient.nom)
             for ingredient in self.ingredients.values()}
         self.__change_containers = Coins(Coin50, Coin20, Coin10, Coin5)
         self.__containers = self.__change_containers.get_dict()
@@ -111,8 +116,8 @@ class Distributeur:
         """Recupere et affiche le prix des elements de
        chaque boite sous forme de dictionnaire"""
  
-        return {key: boite.prix_unitaire for key, boite
-                in self.product_containers.items()}
+        return {key: tarifs.table for key, tarifs
+                in self.__dict_tarifs.items()}
  
     @property
     def stocks(self):
@@ -122,16 +127,16 @@ class Distributeur:
         return {key: boite for key, boite in self.containers.items()}
  
     @mode("maintenance")
-    def changer_prix_unitaire(self, item, prix):
+    def changer_prix_unitaire(self, item, table):
         """Change le prix unitaire d'un boite"""
  
-        self.product_containers[item].prix_unitaire = prix
+        self.__dict_tarifs[item].table = table
  
     @mode("maintenance")
     def prix_unitaire(self, item):
         """Retourne le prix unitaire d'un boite"""
  
-        return self.product_containers[item].prix_unitaire
+        return self.__dict_tarifs[item].table
  
     @mode("maintenance")
     def set_max_stock(self, item, max_stock):
@@ -264,12 +269,14 @@ class Distributeur:
                 return boisson, boisson.supplements(order)
         return None, None
  
-    def __get_prix_boisson(self, order):
-        return sum(
-            self.containers[
-                ing.nom].get_prix_unitaire(value) for ing,
-            value in order.items())
- 
+    def __calculer_prix_boisson(self, order):
+        return sum(self.__dict_tarifs[ing.nom].table[q]
+                   for ing, q in order.items())
+
+    def calculer_prix_boisson(self, unformated_order):
+        order = self.trad(unformated_order)
+        return self.__calculer_prix_boisson(order)
+    
     def __verifier_stock_suffisant(self, boites_a_utiliser, order):
         """Verifie que les stocks sont sufisamment remplit
        pour satisfaire la commande"""
@@ -313,7 +320,8 @@ class Distributeur:
                 if self.__verifier_stock_suffisant(boites_a_utiliser, order):
                     boisson_type, supplements = self.match(order)
                     if boisson_type:
-                        prix = self.__get_prix_boisson(order)
+                        prix = self.__calculer_prix_boisson(order)
+                        self.stats.montant_gagne[boisson_type.nom] += prix
                         if _mtoUse.somme >= prix:
                             _mtoReturn2 = \
                                 self.__verifier_rendu_monnaie_possible(
