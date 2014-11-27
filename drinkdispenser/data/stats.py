@@ -14,6 +14,9 @@ class Stats(object):
             ingredient.nom: 0 for ingredient in self.ingredients}
         self.montant_gagne = {boisson.nom: 0 for boisson in self.boissons}
 
+    def __str__(self):
+        return self.display_all()
+    
     @property
     def mean_montant_gagne(self):
         return {
@@ -75,19 +78,19 @@ class Stats(object):
                  "Vendu%": self.prop_vendu,
                   "Total gagné": self.montant_gagne,
                   "Moy. Gagné": self.mean_montant_gagne}
-        str_stat1 = self.display(self.boissons, stats1)
+        str_stat1 = self.__display(self.boissons, stats1)
 
         stats2 = {"#Conso": self.conso_ingredient,
                  "%Conso": self.prop_conso}
-        str_stat2 = self.display(self.ingredients, stats2)
+        str_stat2 = self.__display(self.ingredients, stats2)
 
-        print(str_stat1 + str_stat2)
+        return str_stat1 + str_stat2
 
-    def display(self, items, stats):
+    def __display(self, items, stats):
         txt_a = a = ""
         txt_b = txt_c = []
-        spaces = max([len(str(boisson))
-                      for boisson in list(items) + list(stats.keys())]) + 1
+        spaces = max([len(str(txt))
+                      for txt in list(items) + list(stats.keys())]) + 1
         txt_a = " " * spaces
         for boisson in items:
             txt_a += "{}{}".format(str(boisson), " " *
@@ -103,4 +106,4 @@ class Stats(object):
             for x in txt_c:
                 a += "{}{}".format(x[i], " " * (spaces - len(x[i])))
             a += "\n"
-        return a
+        return "\n" + a
