@@ -1,3 +1,4 @@
+
 class stack(object):
 
     """ gestion de pile par liste python """

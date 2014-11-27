@@ -35,6 +35,37 @@ class TestDistributeur(unittest.TestCase):
             stock_max_size = m.get_stock_max(produit)
             self.assertEqual(stock_size, stock_max_size)
 
+    def test_max_stock(self):
+        m = Distributeur()
+        self.assertEqual(m.get_stock_max("thé"), 100) #100 valeur par défaut
+
+    def test_set_max_stock(self):
+        m = Distributeur()
+        m.set_max_stock("thé", 200)
+        self.assertEqual(m.get_stock_max("thé"), 200)
+
+    def test_stock(self):
+        m = Distributeur()
+        self.assertEqual(m.get_stock_size("thé"), 0)
+
+    def test_ajouter_stock(self):
+        m = Distributeur()
+        m.ajouter_stock("thé", 20)
+        self.assertEqual(m.get_stock_size("thé"), 20)
+
+    def test_preparer_commande(self):
+        m = Distributeur()
+        m.remplir_tout_stock()
+        order = m.trad((0,1,1,0,1,0))
+        from data import boisson
+        t_boisson = boisson.Cafe
+        from data.ingredient import Lait, Sucre, Cafe
+        ingredients = (Sucre, Lait, Cafe)
+        ma_boisson = m._Distributeur__preparer_commande(order, t_boisson, ingredients)
+        self.assertIsInstance(ma_boisson, boisson.Cafe)
+        for elt in ma_boisson.goblet:
+            self.assertIn(type(elt), ingredients)
+
     def test_vider_caisse(self):
         m = Distributeur()
         m.vider_caisse()
@@ -162,7 +193,7 @@ class TestDistributeur(unittest.TestCase):
         self.assertEqual(m.stats.mean_sucre["Macciato"], 1)
         self.assertEqual(m.stats.prop_with_lait["Macciato"], 100)
         self.assertEqual(m.stats.prop_with_sucre["Macciato"], 50)
-        
+
 def maintenance(distributeur):
     assert isinstance(distributeur, Distributeur), \
         "Le parametre n'est pas un distributeur."
