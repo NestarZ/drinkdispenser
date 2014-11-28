@@ -1,0 +1,737 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{eurosym}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+    \usepackage{xltxtra,xunicode}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\ifxetex
+  \usepackage[setpagesize=false, % page size defined by xetex
+              unicode=false, % unicode breaks when used with xetex
+              xetex]{hyperref}
+\else
+  \usepackage[unicode=true]{hyperref}
+\fi
+\hypersetup{breaklinks=true,
+            bookmarks=true,
+            pdfauthor={},
+            pdftitle={},
+            colorlinks=true,
+            citecolor=blue,
+            urlcolor=blue,
+            linkcolor=magenta,
+            pdfborder={0 0 0}}
+\urlstyle{same}  % don't use monospace font for urls
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\setcounter{secnumdepth}{0}
+
+\date{}
+\begin{document}
+\title{DM Informatique Théorique}
+\author{Marion Medeville \\
+Elias Rhouzlane}
+\date{\today}
+ 
+\maketitle
+\begin{abstract}
+Nous avons listé dans ce document toutes les signatures et axiomes des fonctions de notre programme.
+\end{abstract}
+\section*{Lexique}
+\begin{description}
+  \item
+ $ \textbf{CMDBoisson} : CommandeBoisson$
+\item
+   $\textbf{S, Stocks} : Machine.Stocks$
+ \item
+ $ \textbf{I, Ingredients} : Machine.Ingredients$
+\end{description}
+\section*{Signatures et Axiomes}
+
+Machine~: Monnaie \(\times \) CMDBoisson \(\longrightarrow \) (Monnaie \(\times \) Boisson) \(\cup \) Erreur
+
+\subsection*{Fonction tarifs}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $\emptyset \longrightarrow  E = (NomIngredient \times Prix) ^{\#Ingredient}$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+   $\forall$ nom, prix $\in E$, get\_prix(nom) = prix 
+ \item
+$dim E$ = \(\#\) Ingrédients
+\end{itemize}
+
+\subsection*{Fonction get\_max\_stock}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $Texte \longrightarrow  Taille$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+   $\forall$ nom $\in Texte \Rightarrow$ $get\_stock(nom) \in Stocks$
+\item
+   $\forall$ taille\_max $\in Taille \Rightarrow$ taille\_max $\in \mathbb{N}$
+ \item
+   $\forall$ $stock \in C,$ $ \exists $ $get\_max\_stock(nom) $ avec $ nom=get\_nom(stock)$
+\end{itemize}
+
+\subsection*{Fonction get\_stock\_size}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $Texte \longrightarrow  Taille$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+   nom $\in Texte \Rightarrow$ $get\_stock(nom) \in Stocks$
+\item
+   taille $\in Taille \Rightarrow$ taille $\in \mathbb{N}$ et taille = longueur(get\_stock(nom))
+ \item
+   $\forall$ $stock \in C,$ $ \exists $ $get\_stock\_size(nom) $ avec $ nom=get\_nom(stock)$
+\end{itemize}
+
+\subsection*{Fonction get\_stock}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $Text \longrightarrow  Stock$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+   $\forall$ nom $\in Text,$ $\exists!$ $stock \in Stocks$ tel que $get\_nom(stock) = nom$
+
+\end{itemize}
+
+\pagebreak
+\emph{MODE FONCTIONNEMENT}~
+
+\subsection*{Fonction commander}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $Monnaie \times Cmd_{Boisson} \rightarrow  (Monnaie \times Monnaie \times Boisson) \cup Monnaie$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+  Soient, \\ $(a,b,c,d,e,f), (g,h,i,j,k,l), (m,n,o,p,q,r), (s,t,u,v,w,x)
+ \in(\{0,1\}\textsuperscript{6})\textsuperscript{4}$ \\quatre tuples binaires de longueur 6.
+
+$\exists (a,b,c,d,e,f)$ tel que $mo = (a,b,c,d,e,f)$ avec mo $\in$ Monnaie,
+
+$\exists (g,h,i,j,k,l)$ tel que $cmdb =(g,h,i,j,k,l)$ avec cmdb $\in$ $CMD_{Boisson}$,
+
+Si commande impossible~retourner mo,
+
+Sinon retourner $mo_1$, $ mo_2$, $boisson$ tel que
+
+$\exists(m,n,o,p,q,r)$ tel que $mo_1 =(m,n,o,p,q,r)$ avec $mo_1$ $\in$ $Monnaie$,
+
+$\exists  (s,t,u,v,w,x)$ tel que $mo_2 = (s,t,u,v,w,x)$ avec $mo_2$ $\in$ $Monnaie$,
+
+$mo_1$ = $ mo$ -- 2\euro{}
+
+$mo_1$ + $ mo_2 $ = $ mo$ -- Prix(cmdb)
+
+\end{itemize}
+
+\subsection*{Fonction preparer\_commande}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $Stocks \times (Ingrédient \times Quantité)^{\#Ingredient} \longrightarrow  Boisson$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+  Soit (a,b,c,d,e,f)\(\  \in \ N\)\textsuperscript{6} ,
+  (g,h,i,j,k,l) \(\in \ N\)\textsuperscript{6} et (m,n,o,p,q,r)
+  \(\in \ N\)\textsuperscript{6} trois tuples de binaire de 6 entiers.
+
+Ingrédients = (a,b,c,d,e,f), Commande = (g,h,i,j,k,l), Boisson =
+(m,n,o,p,q,r)
+
+BoissonCommandée = Boisson
+\end{itemize}
+\pagebreak
+
+\subsection*{Fonction verifier\_commande}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $CMD_{boisson} \longrightarrow  \{V, F\}$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+  Soit (a,b,c,d,e,f) \(\in \ N\)\textsuperscript{6} un tuple de
+  binaire de 6 entiers.
+Commande = (a,b,c,d,e,f)
+
+a,b,c,d,e,f \(\in \ \)\{0,1\}
+
+longueur(Commande) = nombre d'ingrédients + 1
+\end{itemize}
+
+\subsection*{Fonction verifier\_stock\_suffisant}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $Stocks \times (Ingrédient \times Quantité)^{\#Ingredient} \longrightarrow  \{V, F\}$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+  Soit (a,b,c,d,e,f) \(\in \ N\)\textsuperscript{6} un tuple de
+  binaire de 6 entiers.
+
+Commande = (a,b,c,d,e,f)
+
+Soit Stock un dictionnaire contenant en clé le nom de l'ingrédient et en
+valeur le stock restant correspondant.
+
+Commande{[}i{]} \(\in \) Stock{[}i{]}
+\end{itemize}
+
+\subsection*{Fonction verifier\_monnaie}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $Monnaie \longrightarrow  \{V, F\}$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+ Soit (a,b,c,d,e,f) \(\in \ N\)\textsuperscript{6} un tuple de
+  binaire de 6 entiers.
+
+Monnaie = (a,b,c,d,e,f)
+
+Longueur(Monnaie) = nombre de pièces différentes
+\end{itemize}
+
+\subsection*{Fonction ramener\_deux\_euros}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $Monnaie \longrightarrow  Monnaie \times Monnaie$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+ Soit (a,b,c,d,e,f)\(\  \in \ N\)\textsuperscript{6} ,
+  (g,h,i,j,k,l) \(\in \ N\)\textsuperscript{6} et (m,n,o,p,q,r)
+  \(\in \ N\)\textsuperscript{6} trois tuples de binaire de 6 entiers.
+
+Monnaie = (a,b,c,d,e,f), Monnaie1 = (g,h,i,j,k,l), Monnaie2 =
+(m,n,o,p,q,r)
+
+g \(\in \) a, h \(\in \) b, I \(\in \) c, j \(\in \) d, k \(\in \) e, l \(\in \) f,
+
+somme(m,n,o,p,q,r)=2
+
+somme(a,b,c,d,e,f)=somme(g,h,I,j,k,l)+2
+
+Monnaie{[}i{]}=Monnaie1{[}i{]}+Monnaie2{[}i{]}
+\end{itemize}
+
+\subsection*{Fonction vérifier\_rendu\_monnaie\_possible}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $Monnaie \times Prix \longrightarrow  \{V, F\}$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+Soit (a,b,c,d,e,f) \(\in \ N\)\textsuperscript{6} un tuple de
+  binaire de 6 entiers.
+
+Monnaie = (a,b,c,d,e,f)
+
+Si \(\exists \) (g,h,i,j,k,l) \(\in \ N\)\textsuperscript{6} un tuple de binaire de
+6 entiers tel que
+
+(g,h,i,j,k,l) = Monnaie -- PrixBoisson, alors retourner Vrai
+
+Sinon retourner Faux
+\end{itemize}
+
+\pagebreak
+
+\subsection*{Fonction rendre\_monnaie}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $Monnaie \times Stocks \longrightarrow  Monnaie$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+Soit (a,b,c,d,e,f)\(\  \in \ N\)\textsuperscript{6} et
+  (g,h,i,j,k,l) \(\in \ N\)\textsuperscript{6} deux tuples de binaire de
+  6 entiers.
+
+Monnaie = (a,b,c,d,e,f), Monnaie2 = (g,h,i,j,k,l)
+
+Monnaie{[}i{]} \(\in \) Sotck{[}i{]}
+
+somme(a,b,c,d,e,f) = somme(g,h,I,j,k,l)-prix(commande)
+\end{itemize}
+
+\subsection*{Fonction formater\_commande}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $CMD_{Boisson} \longrightarrow  (Ingredient \times Quantité)^{\#Ingredients}$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+ Soit (a,b,c,d,e,f) \(\in \ N\)\textsuperscript{6} un tuple de
+  binaire de 6 entiers. Soit (g,h,i,j,k) \(\in \ N\)\textsuperscript{5}
+  un tuple de 5 entiers appartenant à {[}0~, 3{]}.
+
+Commande = (a,b,c,d,e,f) et CommandeAjustée = (g,h,i,j,k)
+
+g = transformation du tuple (a,b) binaire en entier, h=c, i=d, j=e, k=f.
+\end{itemize}
+
+\subsection*{Fonction get\_prix\_boisson}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $  (Ingredient \times Quantité)^{\#Ingredients} \longrightarrow Prix$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+ Soit (a,b,c,d,e) \(\in \ N\)\textsuperscript{5} un tuple de
+  binaire de 6 entiers.
+
+Commande = (a,b,c,d,e)
+
+Somme = prix{[}ingrédient{]}\(\times \)Commande{[}ingrédient{]}
+\end{itemize}
+
+\subsection*{Fonction match}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $   (Ingredient \times Quantité)^{\#Ingredients}  \longrightarrow TypeBoisson \times (TypeSupplement)^{n}$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+ 
+Pour i dans {[}0~;5{]}~: Si Ingrédients{[}i{]} \(\in\) composition d'une
+boisson \(\alpha \) et \(\alpha \){[}Ingrédients{]} \(\in\) Ingrédients alors retourner Vrai
+
+Retourner Faux
+\end{itemize}
+
+\emph{MODE MAINTENANCE}~:
+
+\subsection*{Fonction changer\_prix\_unitaire}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $  Text \times (\mathbb{N} \cup (\mathbb{N} \times \mathbb{N})^{n}) \longrightarrow \emptyset $
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+ Prix\_Unitaire = Nouveau\_Prix
+\end{itemize}
+
+\subsection*{Fonction prix\_unitaire}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $  Text \longrightarrow Prix $
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+  Prix = Prix{[}Ingrédient{]}
+\end{itemize}
+
+\subsection*{Fonction set\_max\_stock}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $  Text \times \mathbb{N} \longrightarrow \emptyset $
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+  Max\_Stock{[}Ingrédient{]} = Nouveau\_Max\_Stock
+\end{itemize}
+
+\subsection*{Fonction reset}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $  \emptyset \longrightarrow \emptyset $
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+ancien historique = nouvel historique
+\end{itemize}
+
+\subsection*{Fonction vider\_caisse}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $  \emptyset \longrightarrow \emptyset$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+ Soit (a,b,c,d,e,f) \(\in \ N\)\textsuperscript{6} un tuple de
+  binaire de 6 entiers.
+
+Caisse = (a,b,c,d,e,f)
+
+Caisse\_vide = (0,0,0,0,0,0)
+\end{itemize}
+
+\subsection*{Fonction get\_all\_stock}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $  \emptyset \longrightarrow Stocks$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+  Soit Stock2 un dictionnaire ayant pour clé le nom de chaque
+  ingrédients et pour valeur le stock correspondant.
+
+nombre de clés du dictionnaire = nombre d'ingrédients
+\end{itemize}
+
+\subsection*{Fonction remplir\_stock}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $  Text \longrightarrow \emptyset$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+Stock(Ingrédient) = Max\_stock
+\end{itemize}
+
+\subsection*{Fonction remplir\_tout\_stock}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $  \emptyset \longrightarrow \emptyset$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+Stocks{[}i{]} = Max\_Stock{[}i{]}
+\end{itemize}
+
+\subsection*{Fonction ajouter\_stock}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $  Text \times \mathbb{N} \longrightarrow \emptyset$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+ Si Stock + quantité \(\in \) Max\_Stock, alors Nouveau\_Stock =
+  Stock + Quantité,
+Sinon Nouveau\_Stock = Stock
+\end{itemize}
+
+\subsection*{Fonction historique}
+\paragraph{Signature}
+\begin{itemize}
+\item
+  $  \emptyset \longrightarrow Historique$
+\end{itemize}
+\paragraph{Axiomes}
+\begin{itemize}
+\item
+  Axiome~:
+\end{itemize}
+\pagebreak
+\section*{COMPLEXITES/ORDRE DE GRANDEUR}
+
+Def tarifs~:
+
+\begin{itemize}
+\item
+  Complexité~: 12
+\item
+  Ordre de grandeur~: O(1)
+\end{itemize}
+
+Def stocks~:
+
+\begin{itemize}
+\item
+  Complexité~: 12
+\item
+  Ordre de grandeur~: O(1)
+\end{itemize}
+
+Def changer\_prix\_unitaire~:
+
+\begin{itemize}
+\item
+  Complexité~: 3n
+\item
+  Ordre de grandeur~: O(n)
+\end{itemize}
+
+Def prix\_unitaire~:
+
+\begin{itemize}
+\item
+  Complexité~: 2
+\item
+  Ordre de grandeur~: O(1)
+\end{itemize}
+
+Def set\_max\_stock~:
+
+\begin{itemize}
+\item
+  Complexité : n + 3
+\item
+  Ordre de grandeur~: O(n)
+\end{itemize}
+
+Def reset :
+
+\begin{itemize}
+\item
+  Complexité : 2n + 25
+\item
+  Ordre de grandeur~: O(n)
+\end{itemize}
+
+Def vider\_caisse :
+
+\begin{itemize}
+\item
+  Complexité : 5n
+\item
+  Ordre de grandeur~: O(n)
+\end{itemize}
+
+Def get\_stock :
+
+\begin{itemize}
+\item
+  Complexité : 3
+\item
+  Ordre de grandeur~: O(1)
+\end{itemize}
+
+Def get\_stock\_size :
+
+\begin{itemize}
+\item
+  Complexité : 3
+\item
+  Ordre de grandeur~: O(1)
+\end{itemize}
+
+Def get\_stock\_max :
+
+\begin{itemize}
+\item
+  Complexité : 5
+\item
+  Ordre de grandeur~: O(1)
+\end{itemize}
+
+Def get\_all\_stock :
+
+\begin{itemize}
+\item
+  Complexité : 5n
+\item
+  Ordre de grandeur~: O(n)
+\end{itemize}
+
+Def remplir\_stock :
+
+\begin{itemize}
+\item
+  Complexité : 3n + 10
+\item
+  Ordre de grandeur~: O(n)
+\end{itemize}
+
+Def remplir\_tout\_stock :
+
+\begin{itemize}
+\item
+  Complexité : 3n + 17
+\item
+  Ordre de grandeur~: O(n)
+\end{itemize}
+
+Def ajouter\_stock :
+
+\begin{itemize}
+\item
+  Complexité : 19
+\item
+  Ordre de grandeur~: O(1)
+\end{itemize}
+
+Def get\_historique :
+
+\begin{itemize}
+\item
+  Complexité : 3
+\item
+  Ordre de grandeur~: O(1)
+\end{itemize}
+
+Def display\_stats :
+
+\begin{itemize}
+\item
+  Complexité : 5 + 6n
+\item
+  Ordre de grandeur~: O(n)
+\end{itemize}
+
+Def verifier\_commande :
+
+\begin{itemize}
+\item
+  Complexité : 11 + 4n
+\item
+  Ordre de grandeur~: O(n)
+\end{itemize}
+
+Def trad :
+
+\begin{itemize}
+\item
+  Complexité : 23
+\item
+  Ordre de grandeur~: O(1)
+\end{itemize}
+
+Def \_\_get\_boites :
+
+\begin{itemize}
+\item
+  Complexité : 4n + 5
+\item
+  Ordre de grandeur~: O(n)
+\end{itemize}
+
+Def \_\_verifier\_monnaie :
+
+\begin{itemize}
+\item
+  Complexité~: 15 + 20n +12n²
+\item
+  Ordre de grandeur~: O(n²)
+\end{itemize}
+
+Def \_\_verifier\_rendu\_monnaie\_possible~:
+
+\begin{itemize}
+\item
+  Complexité~: 6 + 20n + 13n²
+\item
+  Ordre de grandeur~: O(n²)
+\end{itemize}
+
+Def match~:
+
+\begin{itemize}
+\item
+  Complexité~: 8n² + 5n + 2
+\item
+  Ordre de grandeur~: O(n²)
+\end{itemize}
+
+Def \_calculer\_prix\_boisson~:
+
+\begin{itemize}
+\item
+  Complexité~: 3n\textsuperscript{3} - 3n²
+\item
+  Ordre de grandeur~: O(n\textsuperscript{3})
+\end{itemize}
+
+Def calculer\_prix\_boisson~:
+
+\begin{itemize}
+\item
+  Complexité~: 24 + 3n\textsuperscript{3} - n²
+\item
+  Ordre de grandeur~: O(n\textsuperscript{3})
+\end{itemize}
+
+Def \_\_verifier\_stock-suffisant~:
+
+\begin{itemize}
+\item
+  Complexité~: 5n + 2
+\item
+  Ordre de grandeur~: O(n)
+\end{itemize}
+
+Def \_\_preparer\_commande~:
+
+\begin{itemize}
+\item
+  Complexité~: 22 + 17n + 8n²
+\item
+  Ordre de grandeur~: O(n²)
+\end{itemize}
+
+Def commander~:
+
+\begin{itemize}
+\item
+  Complexité~: 91 + 80n + 41n² + n\textsuperscript{3}
+\item
+  Ordre de grandeur~: O(n\textsuperscript{3})
+\end{itemize}
+
+\end{document}

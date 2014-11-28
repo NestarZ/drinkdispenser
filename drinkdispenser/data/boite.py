@@ -19,9 +19,9 @@ class Boite(object):
 
     item_name = 'item'
 
-    def __init__(self, item_type):
+    def __init__(self, item_type, max_size):
         self.__type_ditem = item_type
-        self.__taille_max = 100
+        self.__taille_max = max_size
         self.__boite = []
 
     def __repr__(self):
@@ -89,13 +89,17 @@ class Boite(object):
         # Sucres, je vais réduire le Boite de 3 sucres. Seulement si
         # le Boite est suffisant. La verif (si le Boite est suffisant
         # ne se fait toutefois pas ici, c'est la machine qui le vérifie).
-        if nombre == 0: return []
+        if nombre == 0:
+            return []
         assert self.__boite, Boite.error[10]
         assert self.taille > nombre, Boite.error[11]
         if DEBUG:
             print("Stock({}):{} to {}".format(
                 self, self.taille, self.taille - nombre))
         return [self.__boite.pop() for i in range(nombre)]
+
+    def is_empty(self):
+        return len(self) == 0
 
 
 class BoitePiece(Boite):

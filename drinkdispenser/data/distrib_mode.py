@@ -3,7 +3,7 @@
 try:
     from .distrib_usine import Distributeur
 except (ImportError, SystemError) as e:
-    from distrib_usine import Distributeur
+    from .distrib_usine import Distributeur
 
 # MODES DE LA MACHINE
 

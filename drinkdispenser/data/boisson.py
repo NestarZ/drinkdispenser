@@ -4,7 +4,7 @@ try:
     from data import ingredient
 except ImportError:
     # permet de lancer ce fichier en stand-alone
-    import ingredient
+    from . import ingredient
 
 
 class MetaBoisson(type):
@@ -86,7 +86,8 @@ class Boisson(metaclass=MetaBoisson):
 
     @classmethod
     def supplements(cls, ingredients):
-        return [ing for ing in ingredients if ing in cls.ingredients_optionnels]
+        return [
+            ing for ing in ingredients if ing in cls.ingredients_optionnels]
 
 
 class The(Boisson):

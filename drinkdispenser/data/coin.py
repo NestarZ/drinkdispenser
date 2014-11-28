@@ -45,15 +45,9 @@ class Coin10(Coin):
 class Coin5(Coin):
     value = 5
 
-
-class Coins(object):
+class CoinsManager(object):
 
     types = (Coin200, Coin100, Coin50, Coin20, Coin10, Coin5)
-
-    def __init__(self, *_tuple):
-        assert not False in (isinstance(_, MetaCoin) for _ in _tuple)
-        self.__tuple = _tuple
-        self.__boites = tuple(BoitePiece(_) for _ in _tuple)
 
     def __str__(self):
         return str(
@@ -133,8 +127,17 @@ class Coins(object):
                 self.montant,
                 self.__tuple))
 
-    @classmethod
-    def new(cls, montant, code):
+class CoinsStocker(CoinsManager):
+    """ Gere de la monnaie avec des boites à taille maximum """
+    def __init__(self, *_tuple):
+        assert not False in (isinstance(_, MetaCoin) for _ in _tuple)
+        self.__tuple = _tuple
+        self.__boites = tuple(BoitePiece(_) for _ in _tuple)
+
+
+class CoinsHandler(CoinsManager):
+    """ Gere de la monnaie avec des boites à taille infinie """
+    def __init__(self, montant, code):
         c = cls(*(c for c in Coins.types if c.value in code))
         c.add(montant)
         return c

@@ -12,6 +12,7 @@ import unittest
 
 DEBUG = True
 
+
 class TestDistributeur(unittest.TestCase):
 
     def test_unicite(self):
@@ -37,7 +38,7 @@ class TestDistributeur(unittest.TestCase):
 
     def test_max_stock(self):
         m = Distributeur()
-        self.assertEqual(m.get_stock_max("thé"), 100) #100 valeur par défaut
+        self.assertEqual(m.get_stock_max("thé"), 100)  # 100 valeur par défaut
 
     def test_set_max_stock(self):
         m = Distributeur()
@@ -56,12 +57,15 @@ class TestDistributeur(unittest.TestCase):
     def test_preparer_commande(self):
         m = Distributeur()
         m.remplir_tout_stock()
-        order = m.trad((0,1,1,0,1,0))
+        order = m.trad((0, 1, 1, 0, 1, 0))
         from data import boisson
         t_boisson = boisson.Cafe
         from data.ingredient import Lait, Sucre, Cafe
         ingredients = (Sucre, Lait, Cafe)
-        ma_boisson = m._Distributeur__preparer_commande(order, t_boisson, ingredients)
+        ma_boisson = m._Distributeur__preparer_commande(
+            order,
+            t_boisson,
+            ingredients)
         self.assertIsInstance(ma_boisson, boisson.Cafe)
         for elt in ma_boisson.goblet:
             self.assertIn(type(elt), ingredients)
@@ -109,7 +113,9 @@ class TestDistributeur(unittest.TestCase):
         m.changer_prix_unitaire("thé", 10)
         m.changer_prix_unitaire("lait", 5)
         m.changer_prix_unitaire("sucre", {1: 5, 2: 5, 3: 15})
-        boisson, monnaie1, monnaie2 = m.commander((0, 0, 0, 0, 2, 3), (1, 1, 1, 1, 1, 1))
+        boisson, monnaie1, monnaie2 = m.commander(
+            (0, 0, 0, 0, 2, 3),
+            (1, 1, 1, 1, 1, 1))
         from data.boisson import The
         self.assertIsInstance(boisson, The)
         self.assertEqual(prev_somme, m.caisse.somme - 35)
@@ -146,18 +152,43 @@ class TestDistributeur(unittest.TestCase):
         m.changer_prix_unitaire("café", 20)
         m.changer_prix_unitaire("lait", 5)
         m.changer_prix_unitaire("sucre", {1: 5, 2: 5, 3: 15})
-        prix = m.calculer_prix_boisson((1, 1, 1, 0, 1, 1)) #permet de calculer le prix de la boisson
-        self.assertEqual(prix, 30+20+5+15)
+        # permet de calculer le prix de la boisson
+        prix = m.calculer_prix_boisson((1, 1, 1, 0, 1, 1))
+        self.assertEqual(prix, 30 + 20 + 5 + 15)
 
     def test_reset(self):
-        pass
+        m = Distributeur()
+        prev_l = m.historique()
+        prev_c = m.caisse
+        m.reset()
+        for l in prev_l:
+            self.assertEqual(l, m.historique)
+        for boite in m.caisse:
+            self.assertIs(boite.is_empty(), True)
+        for boite in m.containers:
+            self.assertIs(boite.is_empty(), True)
 
     def test_trad(self):
-        pass
+        m = Distributeur()
+        from data.ingredient import Sucre, Cafe, Chocolat, The, Lait
+        trad_cmd = m.trad((0, 0, 0, 0, 1, 0))
+        self.assertEqual(trad_cmd[Sucre], 0)
+        trad_cmd = m.trad((0, 1, 0, 0, 1, 0))
+        self.assertEqual(trad_cmd[Sucre], 1)
+        trad_cmd = m.trad((1, 0, 0, 0, 1, 0))
+        self.assertEqual(trad_cmd[Sucre], 2)
+        trad_cmd = m.trad((1, 1, 0, 1, 1, 0))
+        self.assertEqual(trad_cmd[Sucre], 3)
+        self.assertEqual(trad_cmd[Cafe], 0)
+        self.assertEqual(trad_cmd[Chocolat], 0)
+        self.assertEqual(trad_cmd[The], 1)
+        trad_cmd = m.trad((1, 1, 1, 0, 1, 0))
+        self.assertEqual(trad_cmd[Lait], 1)
+        self.assertEqual(trad_cmd[Cafe], 1)
+        self.assertEqual(trad_cmd[The], 0)
 
     def test_statistiques(self):
         m = Distributeur()
-        m.reset()
         m.remplir_tout_stock()
         m.changer_prix_unitaire("café", 10)
         m.changer_prix_unitaire("chocolat", 5)
@@ -194,10 +225,10 @@ class TestDistributeur(unittest.TestCase):
         self.assertEqual(m.stats.prop_with_lait["Macciato"], 100)
         self.assertEqual(m.stats.prop_with_sucre["Macciato"], 50)
 
+
 def maintenance(distributeur):
     assert isinstance(distributeur, Distributeur), \
         "Le parametre n'est pas un distributeur."
-    assert not distributeur.commande_en_cours, "La m traite une commande"
     if not isinstance(distributeur, DistributeurMaintenance):
         return DistributeurMaintenance(distributeur)
     return distributeur

@@ -18,9 +18,9 @@ class Tarifs(object):
         5: "Price syntax is not correct, must be int or dict of int"
     }
 
-    def __init__(self, nom):
+    def __init__(self, nom, table):
         self.__nom_item = nom
-        self.__table = {0: 0}
+        self.__table = table
 
     @property
     def table(self):

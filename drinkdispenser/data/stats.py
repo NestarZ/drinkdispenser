@@ -16,14 +16,14 @@ class Stats(object):
 
     def __str__(self):
         return self.display_all()
-    
+
     @property
     def mean_montant_gagne(self):
         return {
             boisson: int(
                 total / self.nb_vendu[boisson]) if self.nb_vendu[boisson] > 0 else 0
             for boisson, total in self.montant_gagne.items()}
-    
+
     @property
     def mean_sucre(self):
         return {
@@ -72,16 +72,16 @@ class Stats(object):
 
     def display_all(self):
         stats1 = {"Vendu": self.nb_vendu,
-                 "Moy. Sucre": self.mean_sucre,
-                 "+Lait%": self.prop_with_lait,
-                 "+Sucre%": self.prop_with_sucre,
-                 "Vendu%": self.prop_vendu,
+                  "Moy. Sucre": self.mean_sucre,
+                  "+Lait%": self.prop_with_lait,
+                  "+Sucre%": self.prop_with_sucre,
+                  "Vendu%": self.prop_vendu,
                   "Total gagné": self.montant_gagne,
                   "Moy. Gagné": self.mean_montant_gagne}
         str_stat1 = self.__display(self.boissons, stats1)
 
         stats2 = {"#Conso": self.conso_ingredient,
-                 "%Conso": self.prop_conso}
+                  "%Conso": self.prop_conso}
         str_stat2 = self.__display(self.ingredients, stats2)
 
         return str_stat1 + str_stat2

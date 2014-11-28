@@ -9,13 +9,13 @@ try:
     from . import boisson
     from . import get_change
 except (ImportError, SystemError) as e:
-    from coin import Coins, Coin200, Coin100, Coin50, Coin20, Coin10, Coin5
-    from ingredient import Cafe, Sucre, Lait, Chocolat, The
-    from boite import BoitePiece, BoiteProduit
-    from tarifs import Tarifs
-    from stats import Stats
-    import boisson
-    import get_change
+    from .coin import Coins, Coin200, Coin100, Coin50, Coin20, Coin10, Coin5
+    from .ingredient import Cafe, Sucre, Lait, Chocolat, The
+    from .boite import BoitePiece, BoiteProduit
+    from .tarifs import Tarifs
+    from .stats import Stats
+    from . import boisson
+    from . import get_change
 
 # MACHINE MODE USINE
 
@@ -32,14 +32,17 @@ class Distributeur:
         5: 'La commande doit etre un tuple binaire.',
     }
 
-    monnaie_acceptee = Coins(Coin200, Coin100, Coin50, Coin20, Coin10, Coin5)
-    monnaie_container = Coins(Coin50, Coin20, Coin10, Coin5)
-    somme_max = Coin200.value
+    default_tarif = {Cafe.nom: 20, The.nom: 10, Chocolat.nom: 30,
+                     Lait.nom: 5, Sucre.nom: {0: 0, 1: 5, 2: 15, 3: 15}}
+    monnaie_acceptee = (200, 100, 50, 20, 10, 5)
+    monnaie_container = (50, 20, 10, 5)
+    default_max_size = 100 #Taille max par défaut de tous les containers
+    somme_max = 200 #Somme maximum que le distributeur sait gérer
 
     def __str__(self):
         return 'Distributeur en mode usine'
 
-    def __init__(self, debug=False):
+    def __init__(self, size_max={}, tarifs={}):
         """Construit le distributeur et integre ses composantes
        (boites, stock, tarifs, caisse)"""
 
@@ -51,12 +54,19 @@ class Distributeur:
             The.nom: The,
         }
         self.__product_containers = {
-            ingredient.nom: BoiteProduit(ingredient)
+            ingredient.nom:
+            BoiteProduit(
+                ingredient, size_max.get(
+                    ingredient.nom, Distributeur.default_max_size))
             for ingredient in self.ingredients.values()}
         self.__dict_tarifs = {
-            ingredient.nom: Tarifs(ingredient.nom)
+            ingredient.nom:
+            Tarifs(
+                ingredient.nom, tarifs.get(
+                    ingredient.nom, Distributeur.default_tarif
+                    [ingredient.nom]))
             for ingredient in self.ingredients.values()}
-        self.__change_containers = Coins(Coin50, Coin20, Coin10, Coin5)
+        self.__change_containers = CoinsStocker({value:size_max[value] for coin in Distributeur.monnaie_container})
         self.__containers = self.__change_containers.get_dict()
         self.__containers.update(self.__product_containers)
         self.__boissons = {
@@ -66,7 +76,7 @@ class Distributeur:
             boisson.Chocolat.nom: boisson.Chocolat,
             boisson.The.nom: boisson.The
         }
-        self.__caisse = Coins(Coin200, Coin100, Coin50, Coin20, Coin10, Coin5)
+        self.__caisse = CoinsHandler(*(value for value in Distributeur.monnaie_acceptee})
         self.__historique = list()
         self.__stats = Stats(self.__ingredients, self.__boissons)
 
@@ -74,7 +84,7 @@ class Distributeur:
         def hist_decorate(func):
             def func_wrapper(self, *args, **kwargs):
                 a = ','.join(["{}".format(repr(arg)) for arg in args])
-                self.historique.append("{}({})".format(func.__name__,a))
+                self.historique.append("{}({})".format(func.__name__, a))
                 return func(self, *args, **kwargs)
             return func_wrapper
         return hist_decorate
@@ -141,7 +151,8 @@ class Distributeur:
     @mode("maintenance")
     def set_max_stock(self, item, max_stock):
         """Determine le stock maximum d'un boite"""
-        assert item in self.containers, "Cet ingrédient n'existe pas, voici la liste :{}".format(self.containers.keys())
+        assert item in self.containers, "Cet ingrédient n'existe pas, voici la liste :{}".format(
+            self.containers.keys())
         self.containers[item].taille_max = max_stock
 
     @mode("maintenance")
@@ -238,13 +249,6 @@ class Distributeur:
             self.ingredients[Chocolat.nom]: (cmd[5] if not is_the else 0),
         }
 
-    def __get_boites(self, cmd):
-        """Retourne les boites d'ingredients commandés"""
-        return {
-            nom: boite for nom,
-            boite in self.product_containers.items() if cmd[
-                self.ingredients[nom]] > 0}
-
     def __verifier_monnaie(self, monnaie):
         """Verifie que la machine peut bien encaisser le paiement"""
 
@@ -277,12 +281,11 @@ class Distributeur:
         order = self.trad(unformated_order)
         return self.__calculer_prix_boisson(order)
 
-    def __verifier_stock_suffisant(self, boites_a_utiliser, order):
+    def __verifier_stock_suffisant(self, stocks, order):
         """Verifie que les stocks sont sufisamment remplit
        pour satisfaire la commande"""
-
-        for (key, boite) in boites_a_utiliser.items():
-            if boite.taille <= order[boite.type_ditem]:
+        for item, quantite in order.items():
+            if stocks[item.nom] <= quantite:
                 return False
         return True
 
@@ -302,7 +305,8 @@ class Distributeur:
         for ingredient_type, quantity in order.items():
             if quantity > 0:
                 self.stats.conso_ingredient[ingredient_type.nom] += quantity
-                ingredients = self.containers[ingredient_type.nom].tirer(quantity)
+                ingredients = self.containers[
+                    ingredient_type.nom].tirer(quantity)
                 boisson.ajouter(ingredients)
         return boisson
 
@@ -317,7 +321,7 @@ class Distributeur:
             if _mtoUse:
                 order = self.trad(commande)
                 boites_a_utiliser = self.__get_boites(order)
-                if self.__verifier_stock_suffisant(boites_a_utiliser, order):
+                if self.__verifier_stock_suffisant(self.product_containers, order):
                     boisson_type, supplements = self.match(order)
                     if boisson_type:
                         prix = self.__calculer_prix_boisson(order)
