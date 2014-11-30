@@ -1,6 +1,7 @@
 \documentclass[]{article}
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
+\usepackage[utf8]{inputenc} 
 \usepackage{ifxetex,ifluatex}
 \usepackage{fixltx2e} % provides \textsubscript
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
@@ -66,6 +67,75 @@ Nous avons listé dans ce document toutes les signatures et axiomes des fonction
  \item
  $ \textbf{I, Ingredients} : Machine.Ingredients$
 \end{description}
+
+\section*{Fonctions disponnibles}
+\begin{itemize}
+\itemsep1pt\parskip0pt\parsep0pt
+\item
+  m.tarifs() permet de connaître les tarifs de chaque ingrédients
+\item
+  m.stocks() permet d'afficher les stocks de chaque ingrédient
+\item
+  m.changer\_prix\_unitaire(ingrédient) permet de changer le prix
+  unitaire d'un ingrédient ,
+\item
+  m.prix\_unitaire(ingrédient) permet d'afficher le prix unitaire d'un
+  ingrédient,
+\item
+  m.set\_max\_stock(ingrédient,max\_stock) permet de déterminer le stock
+  maximum d'un ingrédient,
+\item
+  m.reset() permet de remettre la machine dans son état de sortie
+  d'usine sans réinitialiser l'historique,
+\item
+  m.vider\_caisse() permet de vider la caisse et mettre à 0 le nombre de
+  chaque pièce,
+\item
+  m.get\_stock(item) permet de connaître le stock d'un ingrédient ou
+  d'un type de pièce ,
+\item
+  m.get\_stock\_max(item) permet de connaître la taille maximale d'un
+  ingrédient ou d'un type de pièce ,
+\item
+  get\_stock\_size(item) permet de connaître la taille du stock restant
+  d'un ingrédient ou d'un type de pièce,
+\item
+  m.get\_all\_stock() permet de connaître le stock de tous les
+  ingrédients et types de pièce,
+\item
+  m.remplir\_stock(item) permet de remplir le stock d'un ingrédient ou
+  d'un type de pièce à son maximum ,
+\item
+  m.remplir\_tout\_stock() remplire tous les stocks à leur maximum ,
+\item
+  m.ajouter\_stock(quantité) permet d'ajouter une quantité à un stock
+  déjà existant pour un ingrédient ou un type de pièce ,
+\item
+  m.get\_hostorique() permet de connaître l'historique des commandes de
+  boisson ,
+\item
+  m.display\_stats() permet de connaître les statistiques de chaque
+  boisson (quantité de cette boisson vendu, moyenne de sucre commandé
+  avec, la proportion de lait, de sucre, le total et le montant moye
+  gagnés grâce à cette boisson,la consommation d'ingrédients ainsi que
+  sa proportion) ,
+\item
+  m.commander(monnaie,boisson) permet de commander une boisson en
+  indiquant la monnaie que vous donnez ainsi que la boisson que vous
+  désirez. La monnaie devant être un tuple de la forme (a,b,c,d,e,f),a
+  correspondant à la quantité de nombre de pièces de 2\euro{}, b
+  correspondant à la quantité de nombre de pièces de 1\euro{}, c
+  correspondant à la quantité de nombre de pièces de 0.50\euro{}, d
+  correspondant à la quantité de nombre de pièces de 0.20\euro{}, e
+  correspondant à la quantité de nombre de pièces de 0.10\euro{}, et f
+  correspondant à la quantité de nombre de pièces de 0.05\euro{}. La
+  commande doit être de la même forme, a et b correspondant à la
+  quantité de sucre désirée en binaie (0,0 = 0, 0,1 = 1, 1,0 = 2, 1,1 =
+  3), c correspondant à la quantité de lait, d correspondant à la
+  quantité de thé, e correspondant à la quantité de café, et f
+  correspondant à la quantité de chocolat. Si la quantité de thé est
+  différente de 0, celles de café et de chocolat sont ramenées à 0.)
+\end{itemize}
 \section*{Signatures et Axiomes}
 
 Machine~: Monnaie \(\times \) CMDBoisson \(\longrightarrow \) (Monnaie \(\times \) Boisson) \(\cup \) Erreur
@@ -171,14 +241,16 @@ $mo_1$ + $ mo_2 $ = $ mo$ -- Prix(cmdb)
 \paragraph{Axiomes}
 \begin{itemize}
 \item
-  Soit (a,b,c,d,e,f)\(\  \in \ N\)\textsuperscript{6} ,
-  (g,h,i,j,k,l) \(\in \ N\)\textsuperscript{6} et (m,n,o,p,q,r)
-  \(\in \ N\)\textsuperscript{6} trois tuples de binaire de 6 entiers.
+  Soient, \\ $(a,b,c,d,e,f), (g,h,i,j,k,l), (m,n,o,p,q,r)
+ \in(\{0,1\}\textsuperscript{6})\textsuperscript{3}$ \\trois tuples binaires de longueur 6.
 
-Ingrédients = (a,b,c,d,e,f), Commande = (g,h,i,j,k,l), Boisson =
-(m,n,o,p,q,r)
+$\exists (a,b,c,d,e,f)$ tel que $ing = (a,b,c,d,e,f)$ avec ing $\in$ Ingredient,
 
-BoissonCommandée = Boisson
+$\exists (g,h,i,j,k,l)$ tel que $qu =(g,h,i,j,k,l)$ avec qu $\in$ Quantite,
+
+$\exists (m,n,o,p,q,r)$ tel que $sto = (m,n,o,p,q,r)$ avec stp $\in$ Stock,
+
+$\forall element \in Boisson,$ $\exists ingrédient=element \in Boisson$ et $\#element = quantité$
 \end{itemize}
 \pagebreak
 
@@ -191,13 +263,11 @@ BoissonCommandée = Boisson
 \paragraph{Axiomes}
 \begin{itemize}
 \item
-  Soit (a,b,c,d,e,f) \(\in \ N\)\textsuperscript{6} un tuple de
-  binaire de 6 entiers.
-Commande = (a,b,c,d,e,f)
+  Soit, \\ $(a,b,c,d,e,f) \in(\{0,1\}\textsuperscript{6})$ un tuple binaires de longueur 6.
 
-a,b,c,d,e,f \(\in \ \)\{0,1\}
+$\exists (a,b,c,d,e,f)$ tel que $cmdb = (a,b,c,d,e,f)$ avec cmdb $\in$ $CMD_{Boisson}$,
 
-longueur(Commande) = nombre d'ingrédients + 1
+$longueur(CMD_{Boisson}) = \# ingrédients + 1$
 \end{itemize}
 
 \subsection*{Fonction verifier\_stock\_suffisant}
@@ -209,15 +279,16 @@ longueur(Commande) = nombre d'ingrédients + 1
 \paragraph{Axiomes}
 \begin{itemize}
 \item
-  Soit (a,b,c,d,e,f) \(\in \ N\)\textsuperscript{6} un tuple de
-  binaire de 6 entiers.
+ Soient, \\ $(a,b,c,d,e,f), (g,h,i,j,k,l)
+ \in(\{0,1\}\textsuperscript{6})\textsuperscript{2}$ \\deux tuples binaires de longueur 6.
 
-Commande = (a,b,c,d,e,f)
 
-Soit Stock un dictionnaire contenant en clé le nom de l'ingrédient et en
-valeur le stock restant correspondant.
+$\exists (a,b,c,d,e,f)$ tel que $ing = (a,b,c,d,e,f)$ avec ing $\in$ Ingredient,
 
-Commande{[}i{]} \(\in \) Stock{[}i{]}
+$\exists (g,h,i,j,k,l)$ tel que $qu =(g,h,i,j,k,l)$ avec qu $\in$ Quantite,
+
+Si Quantite $\leq$ à stock (ingredient) alors retourner Vrai
+Sinon retourner Faux
 \end{itemize}
 
 \subsection*{Fonction verifier\_monnaie}
@@ -229,12 +300,11 @@ Commande{[}i{]} \(\in \) Stock{[}i{]}
 \paragraph{Axiomes}
 \begin{itemize}
 \item
- Soit (a,b,c,d,e,f) \(\in \ N\)\textsuperscript{6} un tuple de
-  binaire de 6 entiers.
+  Soit, \\ $(a,b,c,d,e,f) \in(\{0,1\}\textsuperscript{6})$ un tuple binaires de longueur 6.
 
-Monnaie = (a,b,c,d,e,f)
+$\exists (a,b,c,d,e,f)$ tel que $mo = (a,b,c,d,e,f)$ avec mo $\in$ $Monnaie$,
 
-Longueur(Monnaie) = nombre de pièces différentes
+Longueur(Monnaie) = $\#$ de pièces différentes
 \end{itemize}
 
 \subsection*{Fonction ramener\_deux\_euros}
@@ -246,18 +316,16 @@ Longueur(Monnaie) = nombre de pièces différentes
 \paragraph{Axiomes}
 \begin{itemize}
 \item
- Soit (a,b,c,d,e,f)\(\  \in \ N\)\textsuperscript{6} ,
-  (g,h,i,j,k,l) \(\in \ N\)\textsuperscript{6} et (m,n,o,p,q,r)
-  \(\in \ N\)\textsuperscript{6} trois tuples de binaire de 6 entiers.
+  Soit, \\ $(a,b,c,d,e,f) \in(\{0,1\}\textsuperscript{6})$ un tuple binaires de longueur 6.
 
-Monnaie = (a,b,c,d,e,f), Monnaie1 = (g,h,i,j,k,l), Monnaie2 =
-(m,n,o,p,q,r)
+$\exists (a,b,c,d,e,f)$ tel que $mo = (a,b,c,d,e,f)$ avec mo $\in$ $Monnaie$,
+$\forall (a,b,c,d,e,f) \exists (m,n,o,p,q,r), (g,h,i,j,k,l) $tels que :
 
-g \(\in \) a, h \(\in \) b, I \(\in \) c, j \(\in \) d, k \(\in \) e, l \(\in \) f,
+g  \(\leq\) a, h \(\leq \) b, I \(\leq \) c, j \(\leq \) d, k \(\leq \) e, l \(\leq \) f,
 
 somme(m,n,o,p,q,r)=2
 
-somme(a,b,c,d,e,f)=somme(g,h,I,j,k,l)+2
+somme(a,b,c,d,e,f)=somme(g,h,I,j,k,l)+ somme(m,n,o,p,q,r)
 
 Monnaie{[}i{]}=Monnaie1{[}i{]}+Monnaie2{[}i{]}
 \end{itemize}
@@ -271,15 +339,14 @@ Monnaie{[}i{]}=Monnaie1{[}i{]}+Monnaie2{[}i{]}
 \paragraph{Axiomes}
 \begin{itemize}
 \item
-Soit (a,b,c,d,e,f) \(\in \ N\)\textsuperscript{6} un tuple de
-  binaire de 6 entiers.
+  Soit, \\ $(a,b,c,d,e,f) \in(\{0,1\}\textsuperscript{6})$ un tuple binaires de longueur 6.
 
-Monnaie = (a,b,c,d,e,f)
+$\exists (a,b,c,d,e,f)$ tel que $mo = (a,b,c,d,e,f)$ avec mo $\in$ $Monnaie$,
 
 Si \(\exists \) (g,h,i,j,k,l) \(\in \ N\)\textsuperscript{6} un tuple de binaire de
 6 entiers tel que
 
-(g,h,i,j,k,l) = Monnaie -- PrixBoisson, alors retourner Vrai
+(g,h,i,j,k,l) = Monnaie -- Prix, alors retourner Vrai
 
 Sinon retourner Faux
 \end{itemize}
@@ -295,15 +362,12 @@ Sinon retourner Faux
 \paragraph{Axiomes}
 \begin{itemize}
 \item
-Soit (a,b,c,d,e,f)\(\  \in \ N\)\textsuperscript{6} et
-  (g,h,i,j,k,l) \(\in \ N\)\textsuperscript{6} deux tuples de binaire de
-  6 entiers.
+  Soit, \\ $(a,b,c,d,e,f) \in(\{0,1\}\textsuperscript{6})$ un tuple binaires de longueur 6.
 
-Monnaie = (a,b,c,d,e,f), Monnaie2 = (g,h,i,j,k,l)
+$\exists (a,b,c,d,e,f)$ tel que $mo = (a,b,c,d,e,f)$ avec mo $\in$ $Monnaie$,
+$\forall i \in mo, i \leq stocks$
 
-Monnaie{[}i{]} \(\in \) Sotck{[}i{]}
-
-somme(a,b,c,d,e,f) = somme(g,h,I,j,k,l)-prix(commande)
+somme(a,b,c,d,e,f) = somme(g,h,I,j,k,l) - Prix
 \end{itemize}
 
 \subsection*{Fonction formater\_commande}
@@ -333,12 +397,13 @@ g = transformation du tuple (a,b) binaire en entier, h=c, i=d, j=e, k=f.
 \paragraph{Axiomes}
 \begin{itemize}
 \item
- Soit (a,b,c,d,e) \(\in \ N\)\textsuperscript{5} un tuple de
-  binaire de 6 entiers.
+  Soit, \\ $(a,b,c,d,e,f) \in(\{0,1\}\textsuperscript{6})$ un tuple binaires de longueur 6.
+
+$\exists (a,b,c,d,e,f)$ tel que $mo = (a,b,c,d,e,f)$ avec cmdb $\in$ $CMD_{Boisson}$,
 
 Commande = (a,b,c,d,e)
 
-Somme = prix{[}ingrédient{]}\(\times \)Commande{[}ingrédient{]}
+Prix = prix{[}ingrédient{]}\(\times \)Quantite{[}ingrédient{]}
 \end{itemize}
 
 \subsection*{Fonction match}
@@ -351,10 +416,8 @@ Somme = prix{[}ingrédient{]}\(\times \)Commande{[}ingrédient{]}
 \begin{itemize}
 \item
  
-Pour i dans {[}0~;5{]}~: Si Ingrédients{[}i{]} \(\in\) composition d'une
-boisson \(\alpha \) et \(\alpha \){[}Ingrédients{]} \(\in\) Ingrédients alors retourner Vrai
-
-Retourner Faux
+Si Ingredient $\in$ TypeBoisson et $\forall$ element $\in$ TypeBoisson,
+element = ingredient alors retourner TypeBoisson 
 \end{itemize}
 
 \emph{MODE MAINTENANCE}~:
@@ -472,7 +535,7 @@ Stocks{[}i{]} = Max\_Stock{[}i{]}
 \paragraph{Axiomes}
 \begin{itemize}
 \item
- Si Stock + quantité \(\in \) Max\_Stock, alors Nouveau\_Stock =
+ Si Stock + quantité \(\leq \) Max\_Stock, alors Nouveau\_Stock =
   Stock + Quantité,
 Sinon Nouveau\_Stock = Stock
 \end{itemize}
@@ -666,34 +729,34 @@ Def \_\_verifier\_monnaie :
 
 \begin{itemize}
 \item
-  Complexité~: 15 + 20n +12n²
+  Complexité~: 15 + 20n +12n\(^{2}\)
 \item
-  Ordre de grandeur~: O(n²)
+  Ordre de grandeur~: O(n\(^{2}\))
 \end{itemize}
 
 Def \_\_verifier\_rendu\_monnaie\_possible~:
 
 \begin{itemize}
 \item
-  Complexité~: 6 + 20n + 13n²
+  Complexité~: 6 + 20n + 13n\(^{2}\)
 \item
-  Ordre de grandeur~: O(n²)
+  Ordre de grandeur~: O(n\(^{2}\))
 \end{itemize}
 
 Def match~:
 
 \begin{itemize}
 \item
-  Complexité~: 8n² + 5n + 2
+  Complexité~: 8n\(^{2}\) + 5n + 2
 \item
-  Ordre de grandeur~: O(n²)
+  Ordre de grandeur~: O(n\(^{2}\))
 \end{itemize}
 
 Def \_calculer\_prix\_boisson~:
 
 \begin{itemize}
 \item
-  Complexité~: 3n\textsuperscript{3} - 3n²
+  Complexité~: 3n\textsuperscript{3} - 3n\(^{2}\)
 \item
   Ordre de grandeur~: O(n\textsuperscript{3})
 \end{itemize}
@@ -702,7 +765,7 @@ Def calculer\_prix\_boisson~:
 
 \begin{itemize}
 \item
-  Complexité~: 24 + 3n\textsuperscript{3} - n²
+  Complexité~: 24 + 3n\textsuperscript{3} - n\(^{2}\)
 \item
   Ordre de grandeur~: O(n\textsuperscript{3})
 \end{itemize}
@@ -720,16 +783,16 @@ Def \_\_preparer\_commande~:
 
 \begin{itemize}
 \item
-  Complexité~: 22 + 17n + 8n²
+  Complexité~: 22 + 17n + 8n\(^{2}\)
 \item
-  Ordre de grandeur~: O(n²)
+  Ordre de grandeur~: O(n\(^{2}\))
 \end{itemize}
 
 Def commander~:
 
 \begin{itemize}
 \item
-  Complexité~: 91 + 80n + 41n² + n\textsuperscript{3}
+  Complexité~: 91 + 80n + 41n\(^{2}\) + n\textsuperscript{3}
 \item
   Ordre de grandeur~: O(n\textsuperscript{3})
 \end{itemize}

@@ -20,7 +20,8 @@ class Tarifs(object):
 
     def __init__(self, nom, table):
         self.__nom_item = nom
-        self.__table = table
+        self.__table = {0:0}
+        self.table = table
 
     @property
     def table(self):

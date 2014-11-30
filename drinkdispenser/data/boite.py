@@ -21,7 +21,7 @@ class Boite(object):
 
     def __init__(self, item_type, max_size):
         self.__type_ditem = item_type
-        self.__taille_max = max_size
+        self.taille_max = max_size
         self.__boite = []
 
     def __repr__(self):

@@ -10,15 +10,21 @@ from data.distrib_mode import DistributeurMaintenance
 from data.distrib_mode import DistributeurFonctionnement
 import unittest
 
-DEBUG = True
-
-
 class TestDistributeur(unittest.TestCase):
 
     def test_unicite(self):
         m1 = Distributeur()
         m2 = Distributeur()
         self.assertNotEqual(m1, m2)
+
+    def test_creation(self):
+        m = Distributeur(tarifs={'café':20}, stocks_size={'thé':600})
+        self.assertEqual(m.prix_unitaire('café')[1], 20)
+        self.assertEqual(m.get_stock_max('café'), 100)
+        self.assertEqual(m.get_stock_max('thé'), 600)
+        m = Distributeur(stocks_size=700)
+        for produit in m.ingredients:
+            self.assertEqual(m.get_stock_max(produit), 700)
 
     def test_remplir_tout_stock(self):
         m = Distributeur()
@@ -57,7 +63,7 @@ class TestDistributeur(unittest.TestCase):
     def test_preparer_commande(self):
         m = Distributeur()
         m.remplir_tout_stock()
-        order = m.trad((0, 1, 1, 0, 1, 0))
+        order = m._Distributeur__trad((0, 1, 1, 0, 1, 0))
         from data import boisson
         t_boisson = boisson.Cafe
         from data.ingredient import Lait, Sucre, Cafe
@@ -106,24 +112,29 @@ class TestDistributeur(unittest.TestCase):
     def test_commander(self):
         m = Distributeur()
         prev_somme = m.caisse.somme
+        boisson, monnaie2, monnaie1 = m.commander(
+                (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
+        self.assertIs(boisson, None)
+        self.assertEqual(monnaie2.somme, 200)
+        self.assertEqual(monnaie1.somme, 185)
+        prev_somme = m.caisse.somme
         m.remplir_tout_stock()
-        # with self.assertRaises(AssertionError) as cm:
-        #    boisson, monnaie = m.commander(
-        #        (1, 1, 1, 1, 1, 1), (1, 1, 1, 1, 1, 1))
         m.changer_prix_unitaire("thé", 10)
         m.changer_prix_unitaire("lait", 5)
-        m.changer_prix_unitaire("sucre", {1: 5, 2: 5, 3: 15})
-        boisson, monnaie1, monnaie2 = m.commander(
+        m.changer_prix_unitaire("sucre", {1: 5, 2: 15, 3: 15})
+        boisson, monnaie2, monnaie1 = m.commander(
             (0, 0, 0, 0, 2, 3),
-            (1, 1, 1, 1, 1, 1))
+            (0, 0, 0, 1, 0, 0))
         from data.boisson import The
         self.assertIsInstance(boisson, The)
-        self.assertEqual(prev_somme, m.caisse.somme - 35)
-
+        self.assertEqual(prev_somme, m.caisse.somme - (3*5 + 2*10))
+        self.assertEqual(monnaie2.somme, (3*5 + 2*10)-(1*10)) #35c - 10c
+        self.assertEqual(monnaie1.somme, 0) #monnaie.somme > 2€
+        
     def test_correspondance_boisson(self):
         m = Distributeur()
-        boisson_cmd = m.trad((1, 1, 1, 1, 1, 1))
-        boisson_type, supplements = m.match(boisson_cmd)
+        boisson_cmd = m._Distributeur__trad((1, 1, 1, 1, 1, 1))
+        boisson_type, supplements = m._Distributeur__match(boisson_cmd)
         from data.boisson import The
         self.assertEqual(boisson_type, The)
         from data.ingredient import Cafe, Sucre, Lait, Chocolat
@@ -138,13 +149,19 @@ class TestDistributeur(unittest.TestCase):
         mise_en_service(m)
         self.assertIsInstance(m, Distributeur)
         self.assertIsInstance(m, DistributeurFonctionnement)
-
+        with self.assertRaises(Exception) as cm:
+            m.edition()
+        with self.assertRaises(Exception) as cm:
+            m.changer_prix_unitaire("thé", 10)            
+            
     def test_mise_en_maintenance(self):
         m = Distributeur()
         self.assertNotIsInstance(m, DistributeurMaintenance)
         maintenance(m)
         self.assertIsInstance(m, Distributeur)
         self.assertIsInstance(m, DistributeurMaintenance)
+        with self.assertRaises(Exception) as cm:
+            m.commander((0, 0, 0, 0, 2, 3), (0, 0, 0, 1, 0, 0))
 
     def test_calcul_prix_boisson(self):
         m = Distributeur()
@@ -153,36 +170,37 @@ class TestDistributeur(unittest.TestCase):
         m.changer_prix_unitaire("lait", 5)
         m.changer_prix_unitaire("sucre", {1: 5, 2: 5, 3: 15})
         # permet de calculer le prix de la boisson
-        prix = m.calculer_prix_boisson((1, 1, 1, 0, 1, 1))
+        order = m._Distributeur__trad((1, 1, 1, 0, 1, 1))
+        prix = m._Distributeur__calculer_prix_boisson(order)
         self.assertEqual(prix, 30 + 20 + 5 + 15)
 
     def test_reset(self):
         m = Distributeur()
-        prev_l = m.historique()
+        prev_l = m.historique
         prev_c = m.caisse
         m.reset()
         for l in prev_l:
-            self.assertEqual(l, m.historique)
+            self.assertIn(l, m.historique)
         for boite in m.caisse:
             self.assertIs(boite.is_empty(), True)
-        for boite in m.containers:
+        for boite in m.containers.values():
             self.assertIs(boite.is_empty(), True)
 
     def test_trad(self):
         m = Distributeur()
         from data.ingredient import Sucre, Cafe, Chocolat, The, Lait
-        trad_cmd = m.trad((0, 0, 0, 0, 1, 0))
+        trad_cmd = m._Distributeur__trad((0, 0, 0, 0, 1, 0))
         self.assertEqual(trad_cmd[Sucre], 0)
-        trad_cmd = m.trad((0, 1, 0, 0, 1, 0))
+        trad_cmd = m._Distributeur__trad((0, 1, 0, 0, 1, 0))
         self.assertEqual(trad_cmd[Sucre], 1)
-        trad_cmd = m.trad((1, 0, 0, 0, 1, 0))
+        trad_cmd = m._Distributeur__trad((1, 0, 0, 0, 1, 0))
         self.assertEqual(trad_cmd[Sucre], 2)
-        trad_cmd = m.trad((1, 1, 0, 1, 1, 0))
+        trad_cmd = m._Distributeur__trad((1, 1, 0, 1, 1, 0))
         self.assertEqual(trad_cmd[Sucre], 3)
         self.assertEqual(trad_cmd[Cafe], 0)
         self.assertEqual(trad_cmd[Chocolat], 0)
         self.assertEqual(trad_cmd[The], 1)
-        trad_cmd = m.trad((1, 1, 1, 0, 1, 0))
+        trad_cmd = m._Distributeur__trad((1, 1, 1, 0, 1, 0))
         self.assertEqual(trad_cmd[Lait], 1)
         self.assertEqual(trad_cmd[Cafe], 1)
         self.assertEqual(trad_cmd[The], 0)
@@ -242,10 +260,21 @@ def mise_en_service(distributeur):
     return distributeur
 
 if __name__ == "__main__":
+    print("Création d'une machine, accessible par la variable \"m\"")
     m = Distributeur()
-    m.changer_prix_unitaire("chocolat", 30)
-    m.changer_prix_unitaire("café", 20)
-    m.changer_prix_unitaire("thé", 10)
-    m.changer_prix_unitaire("lait", 5)
-    m.changer_prix_unitaire("sucre", {1: 5, 2: 15, 3: 15})
-    unittest.main()
+    print("Lancement des tests sur la machine")
+    a = unittest.TextTestRunner().run(unittest.TestLoader().loadTestsFromTestCase(TestDistributeur))
+    if a.wasSuccessful():
+        print("Succès des tests")
+        print("Mise en mode maintenance de la machine")
+        print("="*30)
+        maintenance(m)
+        print("Voici la liste des commandes disponnibles en fonctionnement et/ou maintenance")
+        print("\n".join([x for x in dir(m) if x[0] != '_']))
+        print("-"*30)
+        print("mise_en_service(m) permet de mettre en service votre machine")
+        print("maintenance(m) permet de mettre en maintenance votre machine")
+    else:
+        print("Les tests ont échoués")
+    
+    

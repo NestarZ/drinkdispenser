@@ -1,15 +1,15 @@
 #!/bin/python3
 # -*- coding: utf-8 -*-
 try:
-    from .coin import Coins, Coin200, Coin100, Coin50, Coin20, Coin10, Coin5
-    from .ingredient import Cafe, Sucre, Lait, Chocolat, The
-    from .boite import BoitePiece, BoiteProduit
-    from .tarifs import Tarifs
-    from .stats import Stats
-    from . import boisson
-    from . import get_change
+    from coin import CoinsStocker
+    from ingredient import Cafe, Sucre, Lait, Chocolat, The
+    from boite import BoitePiece, BoiteProduit
+    from tarifs import Tarifs
+    from stats import Stats
+    import boisson
+    import get_change
 except (ImportError, SystemError) as e:
-    from .coin import Coins, Coin200, Coin100, Coin50, Coin20, Coin10, Coin5
+    from .coin import CoinsStocker
     from .ingredient import Cafe, Sucre, Lait, Chocolat, The
     from .boite import BoitePiece, BoiteProduit
     from .tarifs import Tarifs
@@ -34,18 +34,17 @@ class Distributeur:
 
     default_tarif = {Cafe.nom: 20, The.nom: 10, Chocolat.nom: 30,
                      Lait.nom: 5, Sucre.nom: {0: 0, 1: 5, 2: 15, 3: 15}}
-    monnaie_acceptee = (200, 100, 50, 20, 10, 5)
-    monnaie_container = (50, 20, 10, 5)
+    monnaie_acceptee = tuple((200, 100, 50, 20, 10, 5))
+    monnaie_container = tuple((50, 20, 10, 5))
     default_max_size = 100 #Taille max par défaut de tous les containers
     somme_max = 200 #Somme maximum que le distributeur sait gérer
 
     def __str__(self):
         return 'Distributeur en mode usine'
 
-    def __init__(self, size_max={}, tarifs={}):
+    def __init__(self, **kwargs):
         """Construit le distributeur et integre ses composantes
        (boites, stock, tarifs, caisse)"""
-
         self.__ingredients = {
             Cafe.nom: Cafe,
             Sucre.nom: Sucre,
@@ -53,20 +52,30 @@ class Distributeur:
             Chocolat.nom: Chocolat,
             The.nom: The,
         }
+        
+        for k, v in kwargs.items():
+            assert isinstance(v, dict) or isinstance(v, int)
+            if isinstance(v, int):
+                if k == "stocks_size":
+                    self.default_max_size, kwargs[k] = v, {}
+                elif k ==  "tarifs":
+                    kwargs[k] = {x: v for x in Distributeur.default_tarif}
+            for elt, q in kwargs[k].items():
+                assert elt in self.__ingredients or elt in Distributeur.monnaie_acceptee, "Une des ressources n'existe pas"
         self.__product_containers = {
             ingredient.nom:
             BoiteProduit(
-                ingredient, size_max.get(
-                    ingredient.nom, Distributeur.default_max_size))
+                ingredient, kwargs.get('stocks_size', {}).get(
+                    ingredient.nom, self.default_max_size))
             for ingredient in self.ingredients.values()}
         self.__dict_tarifs = {
             ingredient.nom:
             Tarifs(
-                ingredient.nom, tarifs.get(
+                ingredient.nom, kwargs.get('tarifs', {}).get(
                     ingredient.nom, Distributeur.default_tarif
                     [ingredient.nom]))
             for ingredient in self.ingredients.values()}
-        self.__change_containers = CoinsStocker({value:size_max[value] for coin in Distributeur.monnaie_container})
+        self.__change_containers = CoinsStocker({value: kwargs.get('stocks_size', {}).get(value, self.default_max_size) for value in Distributeur.monnaie_container})
         self.__containers = self.__change_containers.get_dict()
         self.__containers.update(self.__product_containers)
         self.__boissons = {
@@ -76,7 +85,7 @@ class Distributeur:
             boisson.Chocolat.nom: boisson.Chocolat,
             boisson.The.nom: boisson.The
         }
-        self.__caisse = CoinsHandler(*(value for value in Distributeur.monnaie_acceptee})
+        self.__caisse = CoinsStocker.new(tuple((0 for i in Distributeur.monnaie_acceptee)), Distributeur.monnaie_acceptee)
         self.__historique = list()
         self.__stats = Stats(self.__ingredients, self.__boissons)
 
@@ -135,6 +144,11 @@ class Distributeur:
        sous forme de dictionnaire"""
 
         return {key: boite for key, boite in self.containers.items()}
+    
+    @mode("maintenance")
+    def edition(self):
+        print("Caisse : {}\nTotalCaisse = {}".format(self.caisse, self.caisse.somme))
+        print(self.stats)
 
     @mode("maintenance")
     def changer_prix_unitaire(self, item, table):
@@ -236,7 +250,7 @@ class Distributeur:
                              for i in cmd), Distributeur.erreur[5]
         return True
 
-    def trad(self, cmd):
+    def __trad(self, cmd):
         """Verifie puis formate le tuple binaire pour l'adapter a la machine"""
 
         sucre = int('{}{}'.format(cmd[0], cmd[1]), 2)
@@ -261,7 +275,7 @@ class Distributeur:
         total = mtoUse.somme - prix
         return self.change_containers.do_change(total)
 
-    def match(self, order):
+    def __match(self, order):
         """Recherche une correspondance entre la commande
        et une boisson, renvoi la boisson si trouve"""
 
@@ -277,15 +291,11 @@ class Distributeur:
         return sum(self.__dict_tarifs[ing.nom].table[q]
                    for ing, q in order.items())
 
-    def calculer_prix_boisson(self, unformated_order):
-        order = self.trad(unformated_order)
-        return self.__calculer_prix_boisson(order)
-
     def __verifier_stock_suffisant(self, stocks, order):
         """Verifie que les stocks sont sufisamment remplit
        pour satisfaire la commande"""
         for item, quantite in order.items():
-            if stocks[item.nom] <= quantite:
+            if stocks[item.nom].taille <= quantite:
                 return False
         return True
 
@@ -319,10 +329,9 @@ class Distributeur:
         if _commande_acceptee:
             _mtoReturn1, _mtoUse = self.__verifier_monnaie(monnaie)
             if _mtoUse:
-                order = self.trad(commande)
-                boites_a_utiliser = self.__get_boites(order)
+                order = self.__trad(commande)
                 if self.__verifier_stock_suffisant(self.product_containers, order):
-                    boisson_type, supplements = self.match(order)
+                    boisson_type, supplements = self.__match(order)
                     if boisson_type:
                         prix = self.__calculer_prix_boisson(order)
                         self.stats.montant_gagne[boisson_type.nom] += prix
@@ -330,7 +339,7 @@ class Distributeur:
                             _mtoReturn2 = \
                                 self.__verifier_rendu_monnaie_possible(
                                     _mtoUse, prix)
-                            code = Distributeur.monnaie_acceptee.code
+                            code = Distributeur.monnaie_acceptee
                             if _mtoReturn2:
                                 self.caisse.mix(_mtoUse)
                                 return self.__preparer_commande(
@@ -338,4 +347,4 @@ class Distributeur:
                             return None, _mtoUse, _mtoReturn1
                 return None, _mtoUse, _mtoReturn1
         self.commande_en_cours = False
-        return None, monnaie
+        return None, monnaie, None
